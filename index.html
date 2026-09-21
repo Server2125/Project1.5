@@ -1043,6 +1043,69 @@ body[data-theme="dark"] .tariff-row > div:nth-child(3) {
 </main>
 
 <script>
+
+// ============================================================
+// РЕЖИМ РАБОТЫ: API или Excel
+// ============================================================
+const API_BASE = "/api";
+const USE_API = false; // true — работать через API, false — через Excel вручную
+
+// Запрос к API
+async function apiGet(path) {
+  try {
+    const r = await fetch(API_BASE + path);
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const json = await r.json();
+    if (json.status === "error") throw new Error(json.message);
+    return json;
+  } catch (e) {
+    console.error("API error:", path, e);
+    setStatus("⚠ Ошибка API: " + e.message);
+    return null;
+  }
+}
+
+// Заглушки (mock) — работают, пока API нет
+const MOCK = {
+  parents: { status: "ok", items: [
+    { code: "4203100001", name: "Мужское пальто из кожи" },
+    { code: "4107911000", name: "Кожа из шкур КРС" },
+    { code: "4101201000", name: "Необработанные шкуры КРС" }
+  ]},
+  product: { status: "ok",
+    code: "4203100001",
+    name: "Мужское пальто",
+    metrics: {
+      importUSD: 0, exportUSD: 578754, prodUSD: 578875,
+      market: 121, importDependency: 0, localizationIndex: 0.99,
+      producerCount: 6
+    },
+    tree: [
+      { level: 0, code: "4203100001", name: "Мужское пальто" },
+      { level: 1, code: "4107911000", name: "Кожа из шкур КРС" }
+    ],
+    imports: [], exports: [], manufacturers: [], suppliers: []
+  },
+  top: { status: "ok", items: [] },
+  procurement: { status: "ok", items: [] },
+  tariff: { status: "ok", items: [] },
+  rate: { status: "ok", UZS_per_USD: 12600 }
+};
+
+// Универсальный запрос: если USE_API = false — берём mock
+async function apiGetOrMock(path) {
+  if (!USE_API) {
+    if (path === "/parents")              return MOCK.parents;
+    if (path.startsWith("/product/"))     return MOCK.product;
+    if (path.startsWith("/top-products")) return MOCK.top;
+    if (path.startsWith("/procurement"))  return MOCK.procurement;
+    if (path.startsWith("/tariff-inversion")) return MOCK.tariff;
+    if (path === "/currency-rate")        return MOCK.rate;
+    return null;
+  }
+  return apiGet(path);
+}
+
 let DATA={connection:[], imp:[], exp:[], prom:[], procurement:[], registry:[], stavka:[], status:[]}, parents=[], current=null, allNodeMetrics={}, parentIndex=new Map(), levelUsages=new Map();
 let DATA_IDX={imp:new Map(),exp:new Map(),prom:new Map()}, topProducts=[], topVisibleCount=10, topListCollapsed=false;
 let displayCurrency="UZS";
@@ -42065,6 +42128,33 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTariffInversion();
         });
     }
+});
+
+// ============================================================
+// АВТОЗАГРУЗКА ПРИ СТАРТЕ
+// ============================================================
+window.addEventListener("load", async () => {
+  syncStickyOffsets();
+
+  if (USE_API) {
+    setStatus("⏳ Загрузка данных из API...");
+
+    const rate = await apiGetOrMock("/currency-rate");
+    if (rate && rate.UZS_per_USD) {
+      const rateInput = document.getElementById("rate");
+      if (rateInput) rateInput.value = rate.UZS_per_USD;
+    }
+
+    const parents = await apiGetOrMock("/parents");
+    if (parents && parents.items) {
+      // опционально: можно сохранить parents в глобальную переменную,
+      // если хочешь использовать их для поиска без Excel
+    }
+
+    setStatus("✅ Данные загружены через API");
+    document.getElementById("app").classList.remove("hidden");
+  }
+  // если USE_API = false — работаем как раньше, через Excel
 });
 
 </script>
