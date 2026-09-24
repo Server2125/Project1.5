@@ -11,7 +11,7 @@ import openpyxl
 import math
 
 # ============================================================
-# ИНИЦИАЛИЗАЦИЯ (ОДНО приложение!)
+# ИНИЦИАЛИЗАЦИЯ
 # ============================================================
 app = FastAPI(
     title="Карта кооперации API",
@@ -21,16 +21,14 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://project1-5-cvix.onrender.com",  # адрес вашего фронтенда
-    ],
+    allow_origins=["*"],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Пути
-BASE_DIR   = Path(__file__).parent.parent
+# Пути — ВАЖНО: parent, НЕ parent.parent!
+BASE_DIR   = Path(__file__).parent        # 👈 папка, где лежит main.py
 EXCEL_FILE = BASE_DIR / "connection.xlsx"
 DATA_DIR   = BASE_DIR / "data"
 
