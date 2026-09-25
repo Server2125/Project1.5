@@ -27,10 +27,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Пути — ВАЖНО: parent, НЕ parent.parent!
-BASE_DIR   = Path(__file__).parent        # 👈 папка, где лежит main.py
-EXCEL_FILE = BASE_DIR / "connection.xlsx"
-DATA_DIR   = BASE_DIR / "data"
+BASE_DIR = Path(__file__).parent.parent
+EXCEL_FILE = BASE_DIR / "connection.xlsx"   # ✅ корень/connection.xlsx
+DATA_DIR   = BASE_DIR / "data"              # ✅ корень/data/
 
 RATE = 12600  # сум / USD
 
