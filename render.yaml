@@ -1,9 +1,19 @@
-
 services:
+  # ═══ БЭКЕНД ═══
   - type: web
     name: cooperation-map-api
-    runtime: python
+    env: python
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /api/health
+    rootDir: backend                                    # ← main.py в backend/
+    buildCommand: pip install -r requirements.txt       # ← ставит зависимости
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
+
+  # ═══ ФРОНТЕНД ═══
+  - type: web
+    name: cooperation-map
+    env: static
+    plan: free
+    staticPublishPath: .                                # ← index.html в корне
