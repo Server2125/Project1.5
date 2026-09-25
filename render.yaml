@@ -1,19 +1,25 @@
 services:
-  # ═══ БЭКЕНД ═══
+  # ═══════════════════════════════════════
+  # БЭКЕНД (API)
+  # ═══════════════════════════════════════
   - type: web
     name: cooperation-map-api
     env: python
     plan: free
-    rootDir: backend                                    # ← main.py в backend/
-    buildCommand: pip install -r requirements.txt       # ← ставит зависимости
+    region: frankfurt
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
 
-  # ═══ ФРОНТЕНД ═══
+  # ═══════════════════════════════════════
+  # ФРОНТЕНД (статика)
+  # ═══════════════════════════════════════
   - type: web
     name: cooperation-map
     env: static
     plan: free
-    staticPublishPath: .                                # ← index.html в корне
+    region: frankfurt
+    staticPublishPath: .                             # ← index.html в корне
