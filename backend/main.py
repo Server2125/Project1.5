@@ -6,40 +6,13 @@
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pathlib import Path
+from contextlib import asynccontextmanager
 import openpyxl
 import math
 
 # проверка автообновления
-
-# ============================================================
-# ИНИЦИАЛИЗАЦИЯ
-# ============================================================
-app = FastAPI(
-    title="Карта кооперации API",
-    version="2.0",
-    description="API для платформы анализа импортозависимости"
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-BASE_DIR = Path(__file__).parent.parent
-EXCEL_FILE = BASE_DIR / "connection.xlsx"   # ✅ корень/connection.xlsx
-DATA_DIR   = BASE_DIR / "data"              # ✅ корень/data/
-
-RATE = 12600  # сум / USD
-
-print("=" * 60)
-print("📂 BASE_DIR:", BASE_DIR)
-print("📂 Excel:", EXCEL_FILE)
-print("📂 CSV:  ", DATA_DIR)
-print("=" * 60)
 
 # ============================================================
 # ЗАГРУЗКА И КЭШИРОВАНИЕ EXCEL
@@ -69,7 +42,6 @@ def load_xlsx_sheets():
             print(f"  ⚠ Лист '{sheet_name}': пустой")
             continue
 
-        # Нормализуем заголовки
         headers = []
         for i, h in enumerate(rows[0]):
             if h is None:
@@ -97,11 +69,9 @@ def load_xlsx_sheets():
 
 def find_sheet(sheets: dict, aliases: list):
     """Ищет лист по имени (точное совпадение → частичное)."""
-    # Точное
     for name in sheets.keys():
         if name.strip().lower() in [a.lower() for a in aliases]:
             return sheets[name]
-    # Частичное
     for name in sheets.keys():
         norm = name.strip().lower()
         for alias in aliases:
@@ -147,43 +117,75 @@ def _find_col(df, variants):
 
 
 # ============================================================
-# ЭНДПОИНТЫ — CONNECTION (иерархия)
+# LIFESPAN — загрузка данных при старте сервера
+# ============================================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("⏳ Загрузка данных при старте...")
+    app.state.data = load_xlsx_sheets()
+    print("✅ Данные загружены:", list(app.state.data.keys()))
+    yield
+    app.state.data.clear()
+    print("🧹 Данные очищены")
+
+
+# ============================================================
+# ИНИЦИАЛИЗАЦИЯ
+# ============================================================
+app = FastAPI(
+    title="Карта кооперации API",
+    version="2.0",
+    description="API для платформы анализа импортозависимости",
+    lifespan=lifespan
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+BASE_DIR = Path(__file__).parent.parent
+EXCEL_FILE = BASE_DIR / "connection.xlsx"
+DATA_DIR   = BASE_DIR / "data"
+
+RATE = 12600  # сум / USD
+
+print("=" * 60)
+print("📂 BASE_DIR:", BASE_DIR)
+print("📂 Excel:", EXCEL_FILE)
+print("📂 CSV:  ", DATA_DIR)
+print("=" * 60)
+
+
+# ============================================================
+# ЭНДПОИНТЫ
 # ============================================================
 @app.get("/api/connection")
 def get_connection():
     return find_sheet(load_xlsx_sheets(), ["connection", "связи"])
 
 
-# ============================================================
-# ЭНДПОИНТЫ — IMPORT / IMP (алиасы!)
-# ============================================================
 @app.get("/api/import")
 @app.get("/api/imp")
 def get_import():
     return find_sheet(load_xlsx_sheets(), ["import", "импорт"])
 
 
-# ============================================================
-# ЭНДПОИНТЫ — EXPORT / EXP (алиасы!)
-# ============================================================
 @app.get("/api/export")
 @app.get("/api/exp")
 def get_export():
     return find_sheet(load_xlsx_sheets(), ["export", "экспорт"])
 
 
-# ============================================================
-# ЭНДПОИНТЫ — PRODUCTION / PROM (алиасы!)
-# ============================================================
 @app.get("/api/production")
 @app.get("/api/prom")
 def get_production():
     return find_sheet(load_xlsx_sheets(), ["prom", "production", "manufacture", "производство"])
 
 
-# ============================================================
-# ЭНДПОИНТ — PROCUREMENT (госзакупки)
-# ============================================================
 @app.get("/api/procurement")
 def get_procurement():
     sheets = load_xlsx_sheets()
@@ -194,25 +196,16 @@ def get_procurement():
     return result
 
 
-# ============================================================
-# ЭНДПОИНТ — REGISTRY (реестр предприятий)
-# ============================================================
 @app.get("/api/registry")
 def get_registry():
     return find_sheet(load_xlsx_sheets(), ["registry", "реестр", "предприятия", "companies"])
 
 
-# ============================================================
-# ЭНДПОИНТ — STAVKA (тарифные ставки)
-# ============================================================
 @app.get("/api/stavka")
 def get_stavka():
     return find_sheet(load_xlsx_sheets(), ["stavka", "ставка", "тариф", "ставки"])
 
 
-# ============================================================
-# HEALTH CHECK
-# ============================================================
 @app.get("/api/health")
 def health():
     sheets = load_xlsx_sheets()
@@ -221,9 +214,6 @@ def health():
         "sheets": {name: len(rows) for name, rows in sheets.items()},
     }
 
-
-from fastapi.responses import FileResponse
-from pathlib import Path
 
 @app.get("/")
 def root():
