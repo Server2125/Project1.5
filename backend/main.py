@@ -222,22 +222,13 @@ def health():
     }
 
 
+from fastapi.responses import FileResponse
+from pathlib import Path
+
 @app.get("/")
 def root():
-    return {
-        "status": "ok",
-        "message": "API работает. Листы: " + ", ".join(load_xlsx_sheets().keys()),
-        "endpoints": [
-            "/api/connection",
-            "/api/import  (или /api/imp)",
-            "/api/export  (или /api/exp)",
-            "/api/production  (или /api/prom)",
-            "/api/procurement",
-            "/api/registry",
-            "/api/stavka",
-            "/api/health",
-        ],
-    }
+    index_path = Path(__file__).parent.parent / "index.html"
+    return FileResponse(index_path)
 
 
 # ============================================================
