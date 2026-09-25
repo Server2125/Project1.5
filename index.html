@@ -1105,6 +1105,18 @@ document.querySelectorAll("#topProcurementCurrency button").forEach(btn => {
         renderTopProcurement();
     });
 });
+// АВТОЗАГРУЗКА ГОСЗАКУПОК
+fetch(API_CONFIG.baseUrl + API_CONFIG.endpoints.procurement)
+    .then(r => r.json())
+    .then(data => {
+        DATA.procurement = data || [];
+        console.log('✅ DATA.procurement загружен автоматически:', DATA.procurement.length, 'строк');
+        if (typeof buildTopProcurement === 'function') {
+            buildTopProcurement();
+            renderTopProcurement();
+        }
+    })
+    .catch(err => console.error('❌ Ошибка автозагрузки procurement:', err));
 
 // Фильтр
 document.querySelectorAll("#topProcurementFilter button").forEach(btn => {
