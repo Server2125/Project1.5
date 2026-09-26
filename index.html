@@ -1465,10 +1465,9 @@ async function refreshData(options = {}) {
         }
 
         // Вызываем ваш существующий загрузчик API
-        await loadAllDataFromAPI();
-
         _lastRefreshTime = new Date();
         updateLastRefreshLabel();
+        await loadAllDataFromAPI();
 
         console.log(`✅ Данные обновлены в ${_lastRefreshTime.toLocaleTimeString('ru-RU')}`);
 
