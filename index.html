@@ -952,6 +952,7 @@ body[data-theme="dark"] .last-refresh-label {
     <span class="criterion">Импортозависимость — максимум</span>
     <span class="criterion">Индекс локализации — минимум</span>
     <span class="criterion">Производство — минимум</span>
+    <span class="criterion">Совокупный балл</span>
 </div>
     </div>
   </div>
@@ -2138,7 +2139,8 @@ function buildTopProducts() {
             productionScore,
             priorityScore
         };
-        }).sort((a, b) => {
+        
+        .sort((a, b) => {
         // 1. Рынок — максимум
         if (b.market !== a.market) return b.market - a.market;
         // 2. Импортозависимость — максимум
@@ -2165,8 +2167,9 @@ function renderTopProducts(){
     return `
     <div class="top-item" data-top-code="${p.code}" title="Открыть полную информацию по товару">
     <div class="top-rank-wrap">
-        <div class="top-rank">${i+1}</div>
-    </div>
+    <div class="top-rank">${i+1}</div>
+    <div class="priority-score-badge" title="Совокупный балл приоритета">${Math.round(p.priorityScore)}</div>
+</div>
     <div class="top-item-title">
         <div class="top-name">${esc(p.name||"Без названия")}</div>
         <div class="top-code">${p.code}</div>
@@ -2176,8 +2179,6 @@ function renderTopProducts(){
     <div class="top-val export-col"><div class="lbl">Экспорт</div><div class="num">${usd(p.exportUSD)}</div></div>
     <div class="top-val prod-col"><div class="lbl">Производство</div><div class="num">${usd(p.prodUSD)}</div></div>
     <div class="top-rec"><div class="lbl">Рекомендация</div><span class="compact-badge ${rr.cls}" title="${esc(rr.full)}">${esc(rr.short)}</span></div>
-    <div class="top-val"><div class="lbl">СОВОКУПНЫЙ БАЛЛ</div><div class="num">${Math.round(p.priorityScore)}</div></div>
-    </div>`
 
   }).join("")}</div>`;
 
@@ -4198,7 +4199,7 @@ addProduct('2922410000', 'L-Лизин моногидрохлорид (амин�
     imp: 450538,
     exp: 1276,
     stock: 29,
-    cr: 0.92,
+    cr: 0.92, 
     tf: 0.972
 });
         addProduct('6217100000', 'Части одежды или аксессуары одежды, не включенные в другие группировки (кроме трикотажных)', [
