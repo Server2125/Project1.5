@@ -2140,18 +2140,15 @@ function buildTopProducts() {
             priorityScore
         };
         
-        }).sort((a, b) => {
-        // 1. Рынок — максимум
-        if (b.market !== a.market) return b.market - a.market;
-        // 2. Импортозависимость — максимум
-        if (b.id !== a.id) return b.id - a.id;
-        // 3. Индекс локализации — минимум
-        if (a.localizationIndex !== b.localizationIndex) return a.localizationIndex - b.localizationIndex;
-        // 4. Производство — минимум
-        if (a.prodUSD !== b.prodUSD) return a.prodUSD - b.prodUSD;
-        // 5. Резервная сортировка по коду
-        return a.code.localeCompare(b.code);
-    });
+        }).sort((a, b) =>
+        (b.priorityScore - a.priorityScore) ||
+        (b.dependencyScore - a.dependencyScore) ||
+        (b.market - a.market) ||
+        (a.prodUSD - b.prodUSD) ||
+        a.code.localeCompare(b.code)
+    );
+}
+
 
 function renderTopProducts(){
   const host=$("topProductsList"), footer=$("topProductsFooter");
