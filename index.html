@@ -972,11 +972,6 @@ body[data-theme="dark"] .last-refresh-label {
     </div>
     <div class="top-actions">
     <input id="procurementFileInput" type="file" accept=".xlsx,.xls" class="file-native" multiple>
-    <label for="procurementFileInput" class="file-button">
-        <span class="file-button-ico">⇧</span>
-        <span>Загрузить госзакупки</span>
-    </label>
-    <span id="procurementFileName" class="file-name">Файл не выбран</span>
     <div class="segmented" id="topProcurementCurrency">
         <button type="button" data-cur="UZS" class="active">сум</button>
         <button type="button" data-cur="GBP">GBP</button>
@@ -41594,11 +41589,11 @@ function renderTopProcurement() {
     const header = `
         <div class="proc-head">
             <div>ТН ВЭД ТОВАРА</div>
-            <div>НАИМЕНОВАНИЕ ИЗ GOOD_CATEGORY</div>
+            <div>НАИМЕНОВАНИЕ ТОВАРАY</div>
             <div style="text-align:right">ВСЕГО</div>
             <div style="text-align:right">ПРОМПРЕДПРИЯТИЯ</div>
             <div style="text-align:right">ВНЕ РЕЕСТРА</div>
-            <div style="text-align:right">ЗАКУПОК</div>
+            <div style="text-align:right">ОБЪЁМ ГОСЗАКУПОК</div>
         </div>
     `;
     
