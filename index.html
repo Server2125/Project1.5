@@ -952,7 +952,6 @@ body[data-theme="dark"] .last-refresh-label {
     <span class="criterion">Импортозависимость — максимум</span>
     <span class="criterion">Индекс локализации — минимум</span>
     <span class="criterion">Производство — минимум</span>
-    <span class="criterion">Совокупный балл</span>
 </div>
     </div>
   </div>
@@ -2140,14 +2139,18 @@ function buildTopProducts() {
             priorityScore
         };
         
-        }).sort((a, b) =>
-        (b.priorityScore - a.priorityScore) ||
-        (b.dependencyScore - a.dependencyScore) ||
-        (b.market - a.market) ||
-        (a.prodUSD - b.prodUSD) ||
-        a.code.localeCompare(b.code)
-    );
-}
+        }).sort((a, b) => {
+        // 1. Рынок — максимум
+        if (b.market !== a.market) return b.market - a.market;
+        // 2. Импортозависимость — максимум
+        if (b.id !== a.id) return b.id - a.id;
+        // 3. Индекс локализации — минимум
+        if (a.localizationIndex !== b.localizationIndex) return a.localizationIndex - b.localizationIndex;
+        // 4. Производство — минимум
+        if (a.prodUSD !== b.prodUSD) return a.prodUSD - b.prodUSD;
+        // 5. Резервная сортировка по коду
+        return a.code.localeCompare(b.code);
+    });
 
 
 function renderTopProducts(){
@@ -2164,18 +2167,18 @@ function renderTopProducts(){
     return `
     <div class="top-item" data-top-code="${p.code}" title="Открыть полную информацию по товару">
     <div class="top-rank-wrap">
-            <div class="top-rank">${i+1}</div>
-            <div class="priority-score-badge" title="Совокупный балл приоритета">${Math.round(p.priorityScore)}</div>
-        </div>
-        <div class="top-item-title">
-            <div class="top-name">${esc(p.name||"Без названия")}</div>
-            <div class="top-code">${p.code}</div>
-        </div>
-        <div class="top-val"><div class="lbl">Рынок</div><div class="num">${usd(p.market)}</div></div>
-        <div class="top-val"><div class="lbl">Импортозависимость</div><div class="num">${p.id===null?'—':pct(p.id)}</div></div>
-        <div class="top-val export-col"><div class="lbl">Экспорт</div><div class="num">${usd(p.exportUSD)}</div></div>
-        <div class="top-val prod-col"><div class="lbl">Производство</div><div class="num">${usd(p.prodUSD)}</div></div>
-        <div class="top-rec"><div class="lbl">Рекомендация</div><span class="compact-badge ${rr.cls}" title="${esc(rr.full)}">${esc(rr.short)}</span></div>
+        <div class="top-rank">${i+1}</div>
+    </div>
+    <div class="top-item-title">
+        <div class="top-name">${esc(p.name||"Без названия")}</div>
+        <div class="top-code">${p.code}</div>
+    </div>
+    <div class="top-val"><div class="lbl">Рынок</div><div class="num">${usd(p.market)}</div></div>
+    <div class="top-val"><div class="lbl">Импортозависимость</div><div class="num">${p.id===null?'—':pct(p.id)}</div></div>
+    <div class="top-val export-col"><div class="lbl">Экспорт</div><div class="num">${usd(p.exportUSD)}</div></div>
+    <div class="top-val prod-col"><div class="lbl">Производство</div><div class="num">${usd(p.prodUSD)}</div></div>
+    <div class="top-rec"><div class="lbl">Рекомендация</div><span class="compact-badge ${rr.cls}" title="${esc(rr.full)}">${esc(rr.short)}</span></div>
+    <div class="top-val"><div class="lbl">СОВОКУПНЫЙ БАЛЛ</div><div class="num">${Math.round(p.priorityScore)}</div></div>
     </div>`;
   }).join("")}</div>`;
 
