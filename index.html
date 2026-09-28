@@ -943,7 +943,7 @@ body[data-theme="dark"] .last-refresh-label {
   <div class="top-head">
     <div>
       <h2 class="h2title"><span class="sec-ico">★</span><span>Приоритетные товары</span></h2>
-      <div class="section-kicker">Список формируется автоматически по всей базе: выше товары, которые одновременно лучше всего соответствуют всем трём условиям.</div>
+      <div class="small">Рейтинг приоритетных товаров</div>
     </div>
     <div class="top-actions">
       <button id="topToggleBtn" class="ghost">Скрыть список</button>
@@ -1452,16 +1452,13 @@ async function refreshData(options = {}) {
     _refreshInProgress = true;
 
     try {
-        console.log(`🔄 Обновление данных ${userInitiated ? '(вручную)' : '(автоматически)'}...`);
-
-        if (!silent) {
-            setRefreshButtonState(true); // крутим иконку
-        }
-
-        // Вызываем ваш существующий загрузчик API
-        _lastRefreshTime = new Date();
-        updateLastRefreshLabel();
-        await loadAllDataFromAPI();
+    console.log(`🔄 Обновление данных ${userInitiated ? '(вручную)' : '(автоматически)'}...`);
+    if (!silent) {
+        setRefreshButtonState(true);
+    }
+    _lastRefreshTime = new Date();     // ← СНАЧАЛА установить время
+    updateLastRefreshLabel();          // ← и сразу показать
+    await loadAllDataFromAPI();        // ← потом загружать данные
 
         console.log(`✅ Данные обновлены в ${_lastRefreshTime.toLocaleTimeString('ru-RU')}`);
 
