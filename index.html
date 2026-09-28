@@ -2278,7 +2278,7 @@ function renderLevelUsages(code,excludeParentCode=""){
   if(!arr.length){ $("usageCard").classList.add("hidden"); $("usageList").innerHTML=""; return; }
   $("usageCard").classList.remove("hidden");
   $("usageList").innerHTML=`<div class="small" style="margin-bottom:8px">Код <span class="code">${code}</span> является Parent-кодом и одновременно встречается в иерархиях других товаров. Ниже он показан с фактическим уровнем в каждой такой иерархии.</div>`+
-    `<div class="tablewrap"><table><thead><tr><th>Уровень</th><th>Parent ТН ВЭД</th><th>Товар</th></tr></thead><tbody>`+
+    `<div class="tablewrap"><table><thead><tr><th>Уровень</th><th>ТН ВЭД</th><th>Товар</th></tr></thead><tbody>`+
     arr.map(u=>`<tr><td>Level ${u.level}</td><td class="code">${u.parentCode}</td><td>${esc(u.parentName||"Без названия")}</td></tr>`).join("")+
     `</tbody></table></div>`;
 }
