@@ -42213,6 +42213,19 @@ window.addEventListener('DOMContentLoaded', async () => {
         setStatus('❌ Ошибка загрузки данных: ' + err.message);
     }
 });
+
+// Обработчик кнопки "Обновить"
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("refreshBtn");
+    if (btn) {
+        btn.addEventListener("click", () => {
+            refreshData({ userInitiated: true });
+        });
+        console.log("✅ Обработчик кнопки Обновить привязан");
+    } else {
+        console.warn("❌ Кнопка refreshBtn не найдена");
+    }
+});
 </script>
 </body>
 </html>
