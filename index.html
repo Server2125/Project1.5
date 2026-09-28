@@ -42057,13 +42057,23 @@ function buildTariffInversion() {
         if (excess <= 0.01) { skipped++; continue; }
         
         considered++;
+
+        // СОВОКУПНЫЙ БАЛЛ — взвешенная оценка тарифной инверсии
+        // Учитывает: превышение (60%), количество компонентов (20%), низкую ставку товара (10%), высокую сумму компонентов (10%)
+        const excessPart = Math.min(excess, 200) * 0.6;
+        const componentsPart = Math.min(Math.log1p(componentCodes.size) * 10, 30);
+        const lowParentRatePart = parentRate.rate < 5 ? 15 : 0;
+        const highSumPart = sumComponents > 100 ? 15 : 0;
+        const totalScore = Math.round(excessPart + componentsPart + lowParentRatePart + highSumPart);
+
         tariffInversionData.push({
             code: p.code,
             name: p.name,
             parentRate: parentRate.rate,
             sumComponents: sumComponents,
             excess: excess,
-            componentCount: componentCodes.size
+            componentCount: componentCodes.size,
+            totalScore: totalScore
         });
     }
     
@@ -42098,7 +42108,9 @@ function renderTariffInversion() {
         );
     }
     
-    if (tariffInversionState.sortKey === 'excess') rows.sort((a, b) => b.excess - a.excess);
+    if (tariffInversionState.sortKey === 'score') rows.sort((a, b) => b.totalScore - a.totalScore);
+    else if (tariffInversionState.sortKey === 'excess') rows.sort((a, b) => b.excess - a.excess);
+    else rows.sort((a, b) => a.code.localeCompare(b.code));
     else rows.sort((a, b) => a.code.localeCompare(b.code));
     
     const shown = rows.slice(0, tariffInversionState.visible);
@@ -42130,7 +42142,7 @@ function renderTariffInversion() {
             <div class="numcell">${numFmt(p.sumComponents)}</div>
             <div class="numcell"><span class="tariff-badge ${badgeCls(p.excess)}">+${p.excess.toFixed(0)} п.п.</span></div>
             <div class="numcell">${p.componentCount}</div>
-            <div class="numcell">${Math.round(p.excess)}</div>
+            <div class="numcell">${Math.round(p.totalScore)}</div>
         </div>
     `).join('');
     
@@ -42161,10 +42173,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const sortBtn = $('tariffSortBtn');
     if (sortBtn) {
         sortBtn.addEventListener('click', () => {
-            tariffInversionState.sortKey = tariffInversionState.sortKey === 'excess' ? 'code' : 'excess';
-            sortBtn.textContent = tariffInversionState.sortKey === 'excess' ? 'Превышение ↓' : 'Код ↑';
-            renderTariffInversion();
-        });
+         const order = ['score', 'excess', 'code'];
+         const idx = (order.indexOf(tariffInversionState.sortKey) + 1) % order.length;
+        tariffInversionState.sortKey = order[idx];
+        const labels = { score: 'Совокупный балл ↓', excess: 'Превышение ↓', code: 'Код ↑' };
+        sortBtn.textContent = labels[tariffInversionState.sortKey];
+        renderTariffInversion();
+       });
     }
     const toggleBtn = $('tariffToggleBtn');
     if (toggleBtn) {
