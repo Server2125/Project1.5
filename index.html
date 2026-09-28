@@ -42111,7 +42111,6 @@ function renderTariffInversion() {
     if (tariffInversionState.sortKey === 'score') rows.sort((a, b) => b.totalScore - a.totalScore);
     else if (tariffInversionState.sortKey === 'excess') rows.sort((a, b) => b.excess - a.excess);
     else rows.sort((a, b) => a.code.localeCompare(b.code));
-    else rows.sort((a, b) => a.code.localeCompare(b.code));
     
     const shown = rows.slice(0, tariffInversionState.visible);
     
