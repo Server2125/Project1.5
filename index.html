@@ -2289,7 +2289,7 @@ function renderParent(p){
   allNodeMetrics={}; nodes.forEach(n=>allNodeMetrics[n.key||`${n.level}|${n.code}`]=n);
   const a=nodes[0]||calcNode({code:p.code,name:p.name,level:0});
   $("selected").classList.remove("hidden");
-  $("selected").innerHTML=`<div class="selected-head"><div class="selected-title"><h2 class="h2title"><span class="sec-ico">◉</span><span>${esc(p.name)}</span></h2><div class="code">${p.code}</div><div class="small">Цепочек в connection: ${p.rows.length}</div></div><div class="selected-meta-icon">◉</div></div>`;
+  $("selected").innerHTML=`<div class="selected-head"><div class="selected-title"><h2 class="h2title"><span class="sec-ico">◉</span><span>${esc(p.name)}</span></h2><div class="code">${p.code}</div><div class="small">Цепочка: ${p.rows.length}</div></div><div class="selected-meta-icon">◉</div></div>`;
   updateStickySelection(p.name,p.code,'Открыт полный профиль товара');
   renderLevelUsages(p.code,p.code);
 
@@ -41567,7 +41567,7 @@ function renderTopProcurement() {
     const totalPositions = rows.reduce((s, x) => s + (x.count || 0), 0);
     
     if (kicker) {
-        kicker.textContent = `${rows.length} кода · ${money(totalPositions)} позиции · по всем поставщикам · по убыванию`;
+        // kicker.textContent = ...)
     }
     
     // Форматирование денег в млрд/млн
@@ -42115,8 +42115,6 @@ function renderTariffInversion() {
     
     const shown = rows.slice(0, tariffInversionState.visible);
     
-    if (kicker) kicker.textContent = `${tariffInversionData.length} товаров · превышение > 0.01 п.п.`;
-    
     const numFmt = (v) => Number.isFinite(v) ? v.toFixed(0) + '%' : '—';
     const badgeCls = (v) => v >= 50 ? 'high' : v >= 20 ? 'mid' : 'low';
     
@@ -42176,7 +42174,7 @@ document.addEventListener('DOMContentLoaded', () => {
          const order = ['score', 'excess', 'code'];
          const idx = (order.indexOf(tariffInversionState.sortKey) + 1) % order.length;
         tariffInversionState.sortKey = order[idx];
-        const labels = { score: 'Совокупный балл ↓', excess: 'Превышение ↓', code: 'Код ↑' };
+        const labels = { score: 'Совокупный балл ↓', excess: 'Превышение ↓', code: 'Понижение ↑' };
         sortBtn.textContent = labels[tariffInversionState.sortKey];
         renderTariffInversion();
        });
