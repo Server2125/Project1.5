@@ -2493,7 +2493,7 @@ function makeImportTable(rows){
     }
     const arr = Object.entries(ag).sort((a, b) => b[1] - a[1]);
     if (arr.length === 0) return "<div class='small'>Нет данных по импортерам.</div>";
-    return `<div class="tablewrap"><table><thead><tr><th>Импортер</th><th>Объём, ${currencyUnit()}</th></tr></thead><tbody>${arr.map(r => `<tr><td>${esc(r[0])}</td><td>${usd(r[1])}</td></tr>`).join("")}</tbody></table></div>`;
+    return `<div class="tablewrap"><table><thead><tr><th>Импортер</th><th>Объём, ${currencyUnit()}</th></tr></thead><tbody>${arr.map(r => `<tr><td>${esc(r[0])}</td><td>${plainMoney(r[1])}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function makeExportTable(rows){
     if(!rows || !rows.length) return "<div class='small'>Нет записей экспорта по этому ТН ВЭД.</div>";
@@ -2508,7 +2508,7 @@ function makeExportTable(rows){
     }
     const arr = Object.entries(ag).sort((a, b) => b[1] - a[1]);
     if (arr.length === 0) return "<div class='small'>Нет данных по экспортерам.</div>";
-    return `<div class="tablewrap"><table><thead><tr><th>Экспортер</th><th>Объём, ${currencyUnit()}</th></tr></thead><tbody>${arr.map(r => `<tr><td>${esc(r[0])}</td><td>${usd(r[1])}</td></tr>`).join("")}</tbody></table></div>`;
+    return `<div class="tablewrap"><table><thead><tr><th>Экспортер</th><th>Объём, ${currencyUnit()}</th></tr></thead><tbody>${arr.map(r => `<tr><td>${esc(r[0])}</td><td>${plainMoney(r[1])}</td></tr>`).join("")}</tbody></table></div>`;
 }
 function makePromTable(rows){
     if (!rows || rows.length === 0) {
@@ -2568,7 +2568,7 @@ function makePromTable(rows){
 
     return `<div class="tablewrap"><table>
         <thead><tr><th>Производитель</th><th>Объём, тыс. сум</th><th>Объём, ${currencyUnit()}</th></tr></thead>
-        <tbody>${arr.map(r => `<tr><td>${esc(r[0])}</td><td>${money(r[1])}</td><td>${usd(r[1] * 1000 / rate)}</td></tr>`).join("")}</tbody>
+        <tbody>${arr.map(r => `<tr><td>${esc(r[0])}</td><td>${money(r[1])}</td><td>${plainMoney(r[1] * 1000 / rate)}</td></tr>`).join("")}</tbody>
     </table></div>`;
 }
 function makeSuppliersTable(rows){
