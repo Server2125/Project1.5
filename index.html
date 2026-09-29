@@ -733,6 +733,8 @@ body[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#34485f}
     top: 0 !important;
     z-index: 3 !important;
     border-bottom: 2px solid #d6e0ea !important;
+    grid-template-columns: 80px 1fr 120px 120px 120px 90px 60px;
+    display: grid;
 }
 
 .tariff-row {
@@ -741,6 +743,8 @@ body[data-theme="dark"] ::-webkit-scrollbar-thumb{background:#34485f}
     font-size: 13px;
     background: #fff;
     color: #22394f;
+    grid-template-columns: 80px 1fr 120px 120px 120px 90px 60px;
+    display: grid;
 }
 
 .tariff-row:nth-child(even) {
@@ -41570,19 +41574,11 @@ function renderTopProcurement() {
         // kicker.textContent = ...)
     }
     
-    // Форматирование денег в млрд/млн
-    const bigMoney = (v) => {
-        if (!v) return '0 сум';
-        if (cur === 'GBP') {
-            const gbp = v / 16000;
-            if (gbp >= 1e9) return (gbp / 1e9).toFixed(1) + ' млрд GBP';
-            if (gbp >= 1e6) return (gbp / 1e6).toFixed(1) + ' млн GBP';
-            return money(gbp) + ' GBP';
-        }
-        if (v >= 1e9) return (v / 1e9).toFixed(1) + ' млрд сум';
-        if (v >= 1e6) return (v / 1e6).toFixed(1) + ' млн сум';
-        return money(v) + ' сум';
-    };
+    // Форматирование денег: только числа с пробелами
+    const plainMoney = (v) => {
+    if (!v) return '0';
+    return Math.round(v).toLocaleString('ru-RU').replace(/,/g, ' ');
+};
     
     const shown = rows.slice(0, topProcurementState.visible);
     
@@ -41595,6 +41591,8 @@ function renderTopProcurement() {
             <div style="text-align:right">ПРЕДПРИЯТИЕ</div>
             <div style="text-align:right">ВНЕ РЕЕСТРА</div>
             <div style="text-align:right">ОБЪЁМ ГОСЗАКУПОК</div>
+            <div style="text-align:right">ЕД. ИЗМ.</div>
+
         </div>
     `;
     
@@ -41614,10 +41612,11 @@ function renderTopProcurement() {
             <div>
                 <div class="proc-name">${esc(p.name)}</div>
             </div>
-            <div class="numcell">${bigMoney(p.total)}</div>
-            <div class="numcell">${bigMoney(p.industrial)}</div>
-            <div class="numcell">${bigMoney(p.outside)}</div>
+            <div class="numcell">${plainMoney(g.total)}</div>
+            <div class="numcell">${plainMoney(g.industrial)}</div>
+            <div class="numcell">${plainMoney(g.outside)}</div>
             <div class="numcell">${p.count}</div>
+            <div class="numcell">${displayCurrency === 'USD' ? 'USD' : 'сум'}</div>
         </div>`;
     }).join('');
     
