@@ -1907,7 +1907,7 @@ function selectParent(p,scrollToDetails=false){
   $("searchInput").value=p.code+" — "+p.name;
   $("suggestions").classList.add("hidden");
   renderParent(p);
-  if(scrollToDetails)setTimeout(()=>$("selected").scrollIntoView({behavior:"smooth",block:"start"}),40);
+  if(scrollToDetails)setTimeout(()=>{const target = $("selected");if (target) target.scrollIntoView({behavior:"smooth", block:"start"});}, 100);
 }
 
 function aggregate(code) {
