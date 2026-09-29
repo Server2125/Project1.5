@@ -8,6 +8,9 @@
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
 /* Стили для элемента рейтинга */
+.hidden-duplicate {
+        display: none !important;
+    }
 .top-item {
     display: flex;
     flex-direction: column;
@@ -445,6 +448,7 @@ tbody tr:hover{background:#f7fafc}
 .top-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:12px}
 .criteria{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end;align-items:center}
 .criterion{font-size:12px;font-weight:600;color:#46627e;background:#f3f7fb;border:1px solid #e0e7ef;padding:6px 9px;border-radius:999px}
+
 .top-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #topProcurementCard .file-picker,
 #topProcurementCard .file-button{
@@ -916,7 +920,7 @@ body[data-theme="dark"] .last-refresh-label {
 </div>
 
 <main>
-<div class="card">
+<div class="card hidden-duplicate">
   <div class="toolbar">
     <div>
       <label>Курс, сум / USD <span class="label-hint">(текущий курс)</span></label>
