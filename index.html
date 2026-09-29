@@ -2306,7 +2306,7 @@ function renderParent(p){
   const [cls,rec]=recommendation(a);
   const recShort=recommendationShort(a);
   renderMetricCards(a);
-  $("formulaNote").innerHTML=`<b>Расчёт:</b> Производство = сумма столбца prom → «Ҳажми, миинг сўмда» × 1000 / курс; <b>рынок = производство + импорт − экспорт</b>; импортозависимость = импорт / рынок × 100% (если рынок больше 0). Цвет карточек: зелёный — положительное значение / низкий риск, оранжевый — промежуточное значение, красный — отрицательное значение / высокий риск.`;
+  $("formulaNote").innerHTML = `<b>Рынок</b> = производство + импорт − экспорт.`;
 
   $("chainCard").classList.remove("hidden");
   $("chain").className="tree";
