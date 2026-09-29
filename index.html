@@ -2386,10 +2386,10 @@ nodes.map(n=>{
         <td class="levelcell">${n.level===0?'Parent':n.level}</td>
         <td class="code codecell">${n.code}</td>
         <td class="namecell">${esc(n.name)}</td>
-        <td class="numcell">${usd(n.importUSD)}</td>
-        <td class="numcell">${usd(n.exportUSD)}</td>
-        <td class="numcell">${usd(n.prodUSD)}</td>
-        <td class="numcell">${usd(n.market)}</td>
+        <td class="numcell">${plainMoney(n.importUSD)}</td>
+        <td class="numcell">${plainMoney(n.exportUSD)}</td>
+        <td class="numcell">${plainMoney(n.prodUSD)}</td>
+        <td class="numcell">${plainMoney(n.market)}</td>
         <td class="numcell">${n.id===null?'—':pct(n.id)}</td>
         <td class="numcell">${localizationIndex !== null ? localizationIndex.toFixed(1) + '%' : '—'}</td>
         <td class="numcell">${n.producerCount !== undefined ? n.producerCount : 0}</td>
