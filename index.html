@@ -2317,9 +2317,20 @@ function renderParent(p){
   $("importTable").innerHTML=makeImportTable(a.imp);
   $("exportTable").innerHTML=makeExportTable(a.exp);
   $("promTable").innerHTML=makePromTable(a.pro);
-  $("importCount").textContent = " (" + (a.imp ? a.imp.length : 0) + ")";
-  $("exportCount").textContent = " (" + (a.exp ? a.exp.length : 0) + ")";
-  $("promCount").textContent   = " (" + (a.pro ? a.pro.length : 0) + ")";
+  // Импортёры: количество + общая сумма
+    const impArr = a.imp || [];
+    const impTotal = impArr.reduce((s, r) => s + num(r.cost_usd || r['Объём, сум'] || 0), 0);
+   $("importCount").textContent = ` (${impArr.length}) · ${plainMoney(impTotal)} сум`;
+
+  // Экспортёры
+    const expArr = a.exp || [];
+    const expTotal = expArr.reduce((s, r) => s + num(r.cost_usd || r['Объём, сум'] || 0), 0);
+   $("exportCount").textContent = ` (${expArr.length}) · ${plainMoney(expTotal)} сум`;
+
+  // Производители
+   const proArr = a.pro || [];
+   const proTotal = proArr.reduce((s, r) => s + num(r['Ҳажми, минг сўмда'] || r['Объём, тыс. сум'] || 0) * 1000, 0);
+  $("promCount").textContent = ` (${proArr.length}) · ${plainMoney(proTotal)} сум`;
   $("suppliersTable").innerHTML = makeSuppliersTable(a.procurementRows);
    // ===== Рекомендация по локализации =====
   const recoClass = ({
