@@ -2341,7 +2341,7 @@ function renderParent(p){
   }
   if (a.tariff && a.tariff.found && a.tariff.rate !== undefined) {
     const prefix = a.tariff.matchedCode || a.code.slice(0, 4);
-    recoPoints.push(`Базовая тарифная ставка: ${rate.value}%`);
+    recoPoints.push(`Базовая тарифная ставка: ${stavka}%`);
   }
 
   $("recommendation").innerHTML = `
