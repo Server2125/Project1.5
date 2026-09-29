@@ -1288,7 +1288,7 @@ function classifySupplier(row, activeSet) {
 // Краткое название класса для отображения
 function supplierClassLabel(cls) {
     switch (cls) {
-        case 'industrial':  return 'Промпредприятия';
+        case 'industrial':  return 'Предприятия';
         case 'outside':     return 'Вне реестра';
         case 'unknown':     return 'Не определён';
         case 'unclassified':return 'Без реестра';
@@ -41529,7 +41529,7 @@ function buildTopProcurement() {
     console.log('   кодов:', topProcurementData.length);
     console.log('   пропущено:', skipped);
     console.log('   💰 Всего:', sumTot);
-    console.log('   💰 Промпредприятия:', sumInd);
+    console.log('   💰 Предприятия:', sumInd);
     console.log('   💰 Вне реестра:', sumOut);
     console.log('   ✅ Проверка:', sumTot === sumInd + sumOut ? 'OK' : '❌ ОШИБКА');
 }
