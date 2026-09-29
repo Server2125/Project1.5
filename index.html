@@ -1070,6 +1070,7 @@ body[data-theme="dark"] .last-refresh-label {
 <script>
 let DATA={connection:[], imp:[], exp:[], prom:[], procurement:[], registry:[], stavka:[], status:[]}, parents=[], current=null, allNodeMetrics={}, parentIndex=new Map(), levelUsages=new Map();
 let DATA_IDX={imp:new Map(),exp:new Map(),prom:new Map()}, topProducts=[], topVisibleCount=10, topListCollapsed=false;
+let topProcurementData = [];
 let displayCurrency="UZS";
 let displayTheme="light";
 
@@ -1884,8 +1885,8 @@ function prepare(){
     renderTariffInversion();
 }
 
-$("search").addEventListener("input",()=>{
-  const q=txt($("search").value).toLowerCase(), min=Number($("minchars").value)||1;
+$("searchInput").addEventListener("input",()=>{
+  const q=txt($("searchInput").value).toLowerCase(), min=Number($("minchars").value)||1;
   if(q.length<min){$("suggestions").classList.add("hidden");return}
   const out=parents.filter(p=>p.code.includes(q)||p.name.toLowerCase().includes(q)).slice(0,30);
   $("suggestions").innerHTML=out.length?out.map((p,i)=>`<div class="suggestion" data-i="${i}"><span class="code">${p.code}</span> — ${esc(p.name)}</div>`).join(""):`<div class="suggestion">Совпадений нет</div>`;
@@ -1895,14 +1896,14 @@ $("search").addEventListener("input",()=>{
 document.addEventListener("click",e=>{if(!e.target.closest(".searchwrap"))$("suggestions").classList.add("hidden")});
 $("rate").addEventListener("change",()=>{ buildTopProducts(); renderTopProducts(); if(current)renderParent(current); });
 $("clearBtn").onclick=()=>{
-  $("search").value="";$("suggestions").classList.add("hidden");
+  $("searchInput").value="";$("suggestions").classList.add("hidden");
   ["selected","metrics","chainCard","usageCard","tables","allNodesCard"].forEach(id=>$(id).classList.add("hidden"));
   updateStickySelection("","");
 };
 
 function selectParent(p,scrollToDetails=false){
   current=p;
-  $("search").value=p.code+" — "+p.name;
+  $("searchInput").value=p.code+" — "+p.name;
   $("suggestions").classList.add("hidden");
   renderParent(p);
   if(scrollToDetails)setTimeout(()=>$("selected").scrollIntoView({behavior:"smooth",block:"start"}),40);
@@ -41463,7 +41464,6 @@ let topProcurementState = {
     visible: 25,
     collapsed: false
 };
-let topProcurementData = [];
 
 function buildTopProcurement() {
     topProcurementData = [];
