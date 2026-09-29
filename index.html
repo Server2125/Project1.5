@@ -972,11 +972,11 @@ body[data-theme="dark"] .last-refresh-label {
     <input id="procurementFileInput" type="file" accept=".xlsx,.xls" class="file-native" multiple>
     <div class="segmented" id="topProcurementCurrency">
         <button type="button" data-cur="UZS" class="active">сум</button>
-        <button type="button" data-cur="GBP">GBP</button>
+        <button type="button" data-cur="USD">USD</button>
     </div>
     <div class="segmented" id="topProcurementFilter">
         <button type="button" data-filter="all" class="active">Все</button>
-        <button type="button" data-filter="industrial">Промпредприятия</button>
+        <button type="button" data-filter="industrial">Предприятие</button>
         <button type="button" data-filter="outside">Вне реестра</button>
     </div>
     <button id="topProcurementToggle" class="ghost">Скрыть</button>
@@ -42124,7 +42124,6 @@ function renderTariffInversion() {
             <div>НАИМЕНОВАНИЕ ТОВАРА</div>
             <div style="text-align:right">СТАВКА ТОВАРА</div>
             <div style="text-align:right">СУММА СТАВОК КОМПОНЕНТОВ</div>
-            <div style="text-align:right">ПРЕВЫШЕНИЕ</div>
             <div style="text-align:right">КОМПОНЕНТОВ</div>
             <div style="text-align:right">СОВОКУПНЫЙ БАЛЛ</div>
         </div>
@@ -42137,7 +42136,6 @@ function renderTariffInversion() {
             <div>${esc(p.name || 'Без названия')}</div>
             <div class="numcell">${numFmt(p.parentRate)}</div>
             <div class="numcell">${numFmt(p.sumComponents)}</div>
-            <div class="numcell"><span class="tariff-badge ${badgeCls(p.excess)}">+${p.excess.toFixed(0)} п.п.</span></div>
             <div class="numcell">${p.componentCount}</div>
             <div class="numcell">${Math.round(p.totalScore)}</div>
         </div>
