@@ -1892,7 +1892,7 @@ $("searchInput").addEventListener("input",()=>{
   const out=parents.filter(p=>p.code.includes(q)||p.name.toLowerCase().includes(q)).slice(0,30);
   $("suggestions").innerHTML=out.length?out.map((p,i)=>`<div class="suggestion" data-i="${i}"><span class="code">${p.code}</span> — ${esc(p.name)}</div>`).join(""):`<div class="suggestion">Совпадений нет</div>`;
   $("suggestions").classList.remove("hidden");
-  [...$("suggestions").querySelectorAll("[data-i]")].forEach(el=>el.onclick=()=>selectParent(out[+el.dataset.i]));
+  [...$("suggestions").querySelectorAll("[data-i]")].forEach(el=>el.onclick=()=>selectParent(out[+el.dataset.i], true));
 });
 document.addEventListener("click",e=>{if(!e.target.closest(".searchwrap"))$("suggestions").classList.add("hidden")});
 $("rate").addEventListener("change",()=>{ buildTopProducts(); renderTopProducts(); if(current)renderParent(current); });
