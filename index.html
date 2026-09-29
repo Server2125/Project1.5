@@ -41612,9 +41612,9 @@ function renderTopProcurement() {
             <div>
                 <div class="proc-name">${esc(p.name)}</div>
             </div>
-            <div class="numcell">${plainMoney(g.total)}</div>
-            <div class="numcell">${plainMoney(g.industrial)}</div>
-            <div class="numcell">${plainMoney(g.outside)}</div>
+            <div class="numcell">${plainMoney(p.total)}</div>
+            <div class="numcell">${plainMoney(p.industrial)}</div>
+            <div class="numcell">${plainMoney(p.outside)}</div>
             <div class="numcell">${p.count}</div>
             <div class="numcell">${displayCurrency === 'USD' ? 'USD' : 'сум'}</div>
         </div>`;
