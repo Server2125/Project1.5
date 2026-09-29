@@ -1031,7 +1031,7 @@ body[data-theme="dark"] .last-refresh-label {
 </div>
 
 <div id="usageCard" class="card hidden">
-  <h2 class="h2title"><span class="sec-ico">⇄</span><span>Этот код как компонент в других товарах</span></h2>
+  <h2 class="h2title"><span class="sec-ico">⇄</span><span>Компоненты похожих товаров</span></h2>
   <div id="usageList"></div>
 </div>
 
@@ -2283,7 +2283,7 @@ function renderLevelUsages(code,excludeParentCode=""){
   const arr=[...uniq.values()].sort((a,b)=>a.level-b.level||a.parentCode.localeCompare(b.parentCode));
   if(!arr.length){ $("usageCard").classList.add("hidden"); $("usageList").innerHTML=""; return; }
   $("usageCard").classList.remove("hidden");
-  $("usageList").innerHTML=`<div class="small" style="margin-bottom:8px">Код <span class="code">${code}</span> является Parent-кодом и одновременно встречается в иерархиях других товаров. Ниже он показан с фактическим уровнем в каждой такой иерархии.</div>`+
+  $("usageList").innerHTML=`<div class="small" style="margin-bottom:8px">Код <span class="code">${code}</span>Товары, в которых этот код встречается как компонент.</div>`+
     `<div class="tablewrap"><table><thead><tr><th>Уровень</th><th>ТН ВЭД</th><th>Товар</th></tr></thead><tbody>`+
     arr.map(u=>`<tr><td>Level ${u.level}</td><td class="code">${u.parentCode}</td><td>${esc(u.parentName||"Без названия")}</td></tr>`).join("")+
     `</tbody></table></div>`;
