@@ -932,9 +932,9 @@ body[data-theme="dark"] .last-refresh-label {
 </div><div id="app" class="hidden">
 <div class="card search-card">
   <h2 class="h2title"><span class="sec-ico">⌕</span><span>Поиск конечного товара </span></h2>
-  <div class="searchwrap">
-    <input id="search" autocomplete="off" placeholder="Введите ТН ВЭД или часть наименования...">
-    <div id="suggestions" class="suggestions hidden"></div>
+  <div class="search-wrap" style="position: relative;">
+    <input id="searchInput" type="text" placeholder="Введите ТН ВЭД или часть наименования...">
+    <button id="clearSearchBtn" type="button" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); border: none; background: transparent; cursor: pointer; font-size: 18px; color: #888;">✕</button>
   </div>
   </div>
 
@@ -42219,6 +42219,18 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("✅ Обработчик кнопки Обновить привязан");
     } else {
         console.warn("❌ Кнопка refreshBtn не найдена");
+    }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("clearSearchBtn");
+    const input = document.getElementById("searchInput");
+    if (btn && input) {
+        btn.addEventListener("click", () => {
+            input.value = "";
+            input.dispatchEvent(new Event("input"));
+            input.focus();
+        });
     }
 });
 </script>
