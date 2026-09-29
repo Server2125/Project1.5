@@ -1395,6 +1395,10 @@ function usd(n){
   const val=Number.isFinite(Number(n))?Number(n):0;
   return displayCurrency==="USD"?"$ "+money(val):money(val*currentRate())+" сум";
 }
+const plainMoney = (v) => {
+    if (!v) return '0';
+    return Math.round(v).toLocaleString('ru-RU').replace(/,/g, ' ');
+};
 const pct=n=>Number.isFinite(n)?(n*100).toFixed(1)+"%":"—";
 // ============================================================
 // АВТОЗАГРУЗКА ИЗ API
