@@ -41598,12 +41598,6 @@ function renderTopProcurement() {
         // kicker.textContent = ...)
     }
     
-    // Форматирование денег: только числа с пробелами
-    const plainMoney = (v) => {
-    if (!v) return '0';
-    return Math.round(v).toLocaleString('ru-RU').replace(/,/g, ' ');
-};
-    
     const shown = rows.slice(0, topProcurementState.visible);
     
     // ШАПКА таблицы
@@ -41640,7 +41634,7 @@ function renderTopProcurement() {
             <div class="numcell">${plainMoney(p.industrial)}</div>   
             <div class="numcell">${plainMoney(p.outside)}</div>      
             <div class="numcell">${p.count}</div>
-            <div class="numcell">${displayCurrency === 'USD' ? 'USD' : 'сум'}</div>
+            <div class="numcell">${cur === 'UZS' ? 'сум' : 'USD'}</div>
         </div>`;
     }).join('');
     
