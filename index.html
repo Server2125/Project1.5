@@ -1103,11 +1103,11 @@ const API_CONFIG = {
 document.querySelectorAll("#topProcurementCurrency button").forEach(btn => {
     btn.addEventListener("click", () => {
         topProcurementState.currency = btn.dataset.cur || 'UZS';
-        displayCurrency = topProcurementState.currency;   // ← ДОБАВИТЬ
+        displayCurrency = topProcurementState.currency;   // ← синхронизация
         topProcurementState.visible = 25;
         document.querySelectorAll("#topProcurementCurrency button")
             .forEach(b => b.classList.toggle("active", b === btn));
-        renderTopProcurement();
+        renderTopProcurement();                            // ← перерисовка
     });
 });
 // АВТОЗАГРУЗКА ГОСЗАКУПОК
