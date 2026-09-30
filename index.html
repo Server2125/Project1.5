@@ -1103,6 +1103,7 @@ const API_CONFIG = {
 document.querySelectorAll("#topProcurementCurrency button").forEach(btn => {
     btn.addEventListener("click", () => {
         topProcurementState.currency = btn.dataset.cur || 'UZS';
+        displayCurrency = topProcurementState.currency;   // ← ДОБАВИТЬ
         topProcurementState.visible = 25;
         document.querySelectorAll("#topProcurementCurrency button")
             .forEach(b => b.classList.toggle("active", b === btn));
@@ -1402,7 +1403,9 @@ function usd(n){
 }
 const plainMoney = (v) => {
     if (!v) return '0';
-    return Math.round(v).toLocaleString('ru-RU').replace(/,/g, ' ');
+    let val = v;
+    if (displayCurrency === 'USD') val = v / currentRate();
+    return Math.round(val).toLocaleString('ru-RU').replace(/,/g, ' ');
 };
 const pct=n=>Number.isFinite(n)?(n*100).toFixed(1)+"%":"—";
 // ============================================================
