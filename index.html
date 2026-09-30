@@ -41884,7 +41884,7 @@ function analyzeTariffs(nodes) {
 
     const coverage = components.length ? known.length + "/" + components.length : "0/0";
     const diffText = difference === null ? "—" : (difference > 0 ? "+" : "") + rateFmt(difference) + " п.п.";
-    const matchInfo = parentTariff.found ? "совпадение по префиксу " + parentTariff.matchedCode : "ставка не найдена";
+    const matchInfo = parentTariff.found ? "совпадает " + parentTariff.matchedCode : "ставка не найдена";
 
     return {
         cls: cls,
