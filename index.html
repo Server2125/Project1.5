@@ -1650,6 +1650,7 @@ function applyDisplayControls(){
 function refreshRenderedData(){
   if(topProducts.length)renderTopProducts();
   if(current)renderParent(current);
+  if(topProcurementData && topProcurementData.length) renderTopProcurement();   // ← ДОБАВИТЬ
 }
 document.querySelectorAll("[data-currency]").forEach(btn=>btn.addEventListener("click",()=>{
   displayCurrency=btn.dataset.currency;
