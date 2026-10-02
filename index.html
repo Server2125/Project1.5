@@ -1953,15 +1953,6 @@ if (analysisSearchEl) {
         renderTopProcurement(filtered);
     });
 }
-
-// Кнопка Обновить
-const analysisUpdateBtn = document.getElementById("analysisUpdate");
-if (analysisUpdateBtn) {
-    analysisUpdateBtn.addEventListener("click", () => {
-        refreshData({ userInitiated: true });
-    });
-}
-
 function updateStickySelection(name, code, meta=""){
   if(!name && !code){
     $("stickyCurrent").classList.add("hidden");
