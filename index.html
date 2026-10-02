@@ -1702,6 +1702,7 @@ async function loadAllDataFromAPI() {
   // prepareDataIndexes(), buildTopProducts(), buildTopProcurement(), renderTopProcurement()
   activeTinSet = buildActiveTinSet();
 prepare();
+updateStatsCards();
 return { loaded, failed };
 }
 // ═══════════════════════════════════════════════════
@@ -1902,6 +1903,7 @@ function applyDisplayControls(){
   document.querySelectorAll("[data-theme-value]").forEach(b=>b.classList.toggle("active",b.dataset.themeValue===displayTheme));
   syncStickyOffsets();
 }
+
 function refreshRenderedData() {
     if (topProducts.length) renderTopProducts();
     if (current) renderParent(current);
@@ -1918,6 +1920,33 @@ document.querySelectorAll("[data-theme-value]").forEach(btn=>btn.addEventListene
   applyDisplayControls();
 }));
 applyDisplayControls();
+// Поиск в параметрах анализа
+const analysisSearchEl = document.getElementById("analysisSearch");
+if (analysisSearchEl) {
+    analysisSearchEl.addEventListener("input", () => {
+        const query = analysisSearchEl.value.toLowerCase().trim();
+        if (!query) {
+            renderTopProcurement();
+            return;
+        }
+        const filtered = topProcurementData.filter(x =>
+            (x.code && x.code.toLowerCase().includes(query)) ||
+            (x.name && x.name.toLowerCase().includes(query))
+        );
+        const original = topProcurementData;
+        topProcurementData = filtered;
+        renderTopProcurement();
+        topProcurementData = original;
+    });
+}
+
+// Кнопка Обновить
+const analysisUpdateBtn = document.getElementById("analysisUpdate");
+if (analysisUpdateBtn) {
+    analysisUpdateBtn.addEventListener("click", () => {
+        refreshData({ userInitiated: true });
+    });
+}
 
 function updateStickySelection(name, code, meta=""){
   if(!name && !code){
