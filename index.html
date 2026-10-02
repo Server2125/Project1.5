@@ -42557,6 +42557,60 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+document.addEventListener("DOMContentLoaded", () => {
+    // ===== ПАРАМЕТРЫ АНАЛИЗА =====
+
+    // Поиск
+    const analysisSearchEl = document.getElementById("analysisSearch");
+    if (analysisSearchEl) {
+        analysisSearchEl.addEventListener("input", () => {
+            const query = analysisSearchEl.value.toLowerCase().trim();
+            if (!query) {
+                renderTopProcurement();
+                return;
+            }
+            const filtered = topProcurementData.filter(x =>
+                (x.code && x.code.toLowerCase().includes(query)) ||
+                (x.name && x.name.toLowerCase().includes(query))
+            );
+            const original = topProcurementData;
+            topProcurementData = filtered;
+            renderTopProcurement();
+            topProcurementData = original;
+        });
+    }
+
+    // Курс
+    const analysisRateEl = document.getElementById("analysisRate");
+    if (analysisRateEl) {
+        analysisRateEl.addEventListener("change", () => {
+            const rateInput = document.getElementById("rate");
+            if (rateInput) rateInput.value = analysisRateEl.value;
+            refreshRenderedData();
+        });
+    }
+
+    // Минимальный балл
+    const analysisMinBallEl = document.getElementById("analysisMinBall");
+    if (analysisMinBallEl) {
+        analysisMinBallEl.addEventListener("change", () => {
+            const minBall = Number(analysisMinBallEl.value) || 0;
+            const filtered = topProcurementData.filter(x => (x.total || 0) >= minBall * 1e9);
+            const original = topProcurementData;
+            topProcurementData = filtered;
+            renderTopProcurement();
+            topProcurementData = original;
+        });
+    }
+
+    // Кнопка "Обновить"
+    const analysisUpdateBtn = document.getElementById("analysisUpdate");
+    if (analysisUpdateBtn) {
+        analysisUpdateBtn.addEventListener("click", () => {
+            refreshData({ userInitiated: true });
+        });
+    }
+});
 </script>
 </body>
 </html>
