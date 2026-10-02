@@ -1677,6 +1677,7 @@ async function loadAllDataFromAPI() {
                  : Array.isArray(json.result) ? json.result
                  : [];
       return [key, rows];
+      updateStatsCards();
     })
   );
 
@@ -1904,7 +1905,7 @@ function refreshRenderedData() {
     if (topProducts.length) renderTopProducts();
     if (current) renderParent(current);
     if (topProcurementData && topProcurementData.length) renderTopProcurement();
-    updateStatsCards();   // ← ДОБАВИТЬ
+    updateStatsCards();   // ← ДОЛЖНО БЫТЬ
 }
 document.querySelectorAll("[data-currency]").forEach(btn=>btn.addEventListener("click",()=>{
   displayCurrency=btn.dataset.currency;
