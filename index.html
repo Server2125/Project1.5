@@ -42465,42 +42465,40 @@ function renderTariffInversion() {
     }
 }
 
-// Обработчики
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = $('tariffSearch');
-    if (searchInput) {
-        searchInput.addEventListener('input', () => {
-            tariffInversionState.search = searchInput.value;
-            tariffInversionState.visible = 25;
-            renderTariffInversion();
-        });
-    }
-    const sortBtn = $('tariffSortBtn');
-    if (sortBtn) {
-        sortBtn.addEventListener('click', () => {
-         const order = ['score', 'excess', 'code'];
-         const idx = (order.indexOf(tariffInversionState.sortKey) + 1) % order.length;
-        tariffInversionState.sortKey = order[idx];
-        const labels = { score: 'Совокупный балл ↓', excess: 'Превышение ↓', code: 'Понижение ↑' };
-        sortBtn.textContent = labels[tariffInversionState.sortKey];
-        renderTariffInversion();
-       });
-    }
-    const toggleBtn = $('tariffToggleBtn');
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            tariffInversionState.collapsed = !tariffInversionState.collapsed;
-            renderTariffInversion();
-        });
-    }
-    const showMore = $('tariffShowMore');
-    if (showMore) {
-        showMore.addEventListener('click', () => {
-            tariffInversionState.visible += 25;
-            renderTariffInversion();
-        });
-    }
+// Ждем, пока страница полностью загрузится
+document.addEventListener('DOMContentLoaded', function() {
+    // Загружаем данные из встроенной базы
+    convertProductsToData();
+
+    // Обновляем sticky-заголовок
+    syncStickyOffsets();
 });
+// ============================================
+// ФУНКЦИИ ДЛЯ РАБОТЫ СО СТАВКАМИ (stavka)
+// ============================================
+
+// Нормализация кода для ставок (убираем ведущие нули)
+const tariffCode = v => {
+    const s = normCode(v).replace(/^0+/, "");
+    return s || "0";
+};
+
+// Индекс ставок
+let TARIFF_INDEX = [];
+
+// Подготовка индекса ставок
+function prepareTariffIndex() {
+    TARIFF_INDEX = [];
+    for (const r of DATA.stavka) {
+        const rawCode = field(r, ["TNVED", "ТНВЭД", "ТН ВЭД", "tnved"]);
+        const code = tariffCode(rawCode);
+        if (!code || code === "0") continue;
+        const rate = num(field(r, ["Stavka", "Ставка", "stavka"]));
+        TARIFF_INDEX.push({ code, rate, rawCode: txt(rawCode) });
+    }
+    // Сортируем по длине кода (самые длинные сначала)
+    TARIFF_INDEX.sort((a, b) => b.code.length - a.code.length || a.code.localeCompare(b.code));
+}
 
 // ═══════════════════════════════════════════════════
 // АВТОЗАГРУЗКА ДАННЫХ ИЗ API ПРИ СТАРТЕ
@@ -42563,7 +42561,6 @@ if (analysisSearchEl) {
         renderTopProcurement(filtered);
     });
 }
-});
     // Курс
     const analysisRateEl = document.getElementById("analysisRate");
     if (analysisRateEl) {
@@ -42594,7 +42591,6 @@ if (analysisSearchEl) {
             refreshData({ userInitiated: true });
         });
     }
-});
 </script>
 </body>
 </html>
