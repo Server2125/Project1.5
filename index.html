@@ -1014,6 +1014,30 @@ body[data-theme="dark"] .last-refresh-label {
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    border-left: 4px solid #3b82f6;   /* синяя полоса слева */
+}
+/* 1. Приоритетные товары — оранжевый */
+.stat-card:nth-child(1) {
+    border-left-color: #f59e0b;
+    background: linear-gradient(180deg, #fff 0%, #fff8ec 100%);
+}
+
+/* 2. Потенциальный рынок — зелёный */
+.stat-card:nth-child(2) {
+    border-left-color: #22a06b;
+    background: linear-gradient(180deg, #fff 0%, #ecfdf5 100%);
+}
+
+/* 3. Импортозависимость — синий */
+.stat-card:nth-child(3) {
+    border-left-color: #3b82f6;
+    background: linear-gradient(180deg, #fff 0%, #eff6ff 100%);
+}
+
+/* 4. Локализация — фиолетовый */
+.stat-card:nth-child(4) {
+    border-left-color: #8b5cf6;
+    background: linear-gradient(180deg, #fff 0%, #f5f3ff 100%);
 }
 
 .stat-icon {
