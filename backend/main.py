@@ -214,7 +214,9 @@ def health():
         "sheets": {name: len(rows) for name, rows in sheets.items()},
     }
 
+from fastapi.staticfiles import StaticFiles
 
+app.mount("/static", StaticFiles(directory="."), name="static")
 @app.get("/")
 def root():
     index_path = Path(__file__).parent.parent / "index.html"
