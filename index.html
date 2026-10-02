@@ -1950,10 +1950,7 @@ if (analysisSearchEl) {
             (x.code && x.code.toLowerCase().includes(query)) ||
             (x.name && x.name.toLowerCase().includes(query))
         );
-        const original = topProcurementData;
-        topProcurementData = filtered;
-        renderTopProcurement();
-        topProcurementData = original;
+        renderTopProcurement(filtered);
     });
 }
 
@@ -41868,6 +41865,7 @@ function renderTopProcurement(customRows) {
     const footer = $("topProcurementFooter");
     const kicker = $("topProcurementKicker");
     if (!host) return;
+    
     const data = customRows || topProcurementData;
     
     if (!data || !data.length) {
