@@ -934,6 +934,116 @@ body[data-theme="dark"] .last-refresh-label {
     gap: 16px;
     margin-left: auto;              /* ← КНОПКИ ВПРАВО */
 }
+.analysis-params {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.analysis-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a2b3c;
+    margin: 0 0 12px 0;
+}
+
+.analysis-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.analysis-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 140px;
+}
+
+.analysis-field label {
+    font-size: 12px;
+    color: #61758a;
+    font-weight: 500;
+}
+
+.analysis-field input,
+.analysis-field select {
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #d8e2ec;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #22394f;
+    background: #fff;
+    outline: none;
+}
+
+.analysis-field-btn {
+    flex: 0 0 auto;
+}
+
+.btn-primary {
+    height: 36px;
+    padding: 0 20px;
+    background: #3b82f6;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-primary:hover {
+    background: #2563eb;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.stat-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #61758a;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a2b3c;
+}
+
+.stat-change {
+    font-size: 11px;
+    color: #22a06b;
+}
+
+@media (max-width: 900px) {
+    .stats-cards { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 500px) {
+    .stats-cards { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
@@ -984,6 +1094,64 @@ body[data-theme="dark"] .last-refresh-label {
 </div>
 
 <main>
+    <div class="analysis-params card">
+    <h2 class="analysis-title">Параметры анализа</h2>
+    <div class="analysis-row">
+        <div class="analysis-field">
+            <label>Поиск</label>
+            <input type="text" id="analysisSearch" placeholder="Введите название товара или код ТН ВЭД">
+        </div>
+        <div class="analysis-field">
+            <label>Курс доллара (сум)</label>
+            <input type="number" id="analysisRate" value="12600">
+        </div>
+        <div class="analysis-field">
+            <label>Минимальный балл</label>
+            <input type="number" id="analysisMinBall" value="1">
+        </div>
+        <div class="analysis-field">
+            <label>Период</label>
+            <select id="analysisPeriod">
+                <option value="all">Все периоды</option>
+            </select>
+        </div>
+        <div class="analysis-field">
+            <label>Регионы</label>
+            <select id="analysisRegion">
+                <option value="all">Все регионы</option>
+            </select>
+        </div>
+        <div class="analysis-field analysis-field-btn">
+            <button id="analysisUpdate" class="btn-primary">Обновить</button>
+        </div>
+    </div>
+</div>
+<div class="stats-cards">
+    <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-label">Приоритетные товары</div>
+        <div class="stat-value" id="statPriorityCount">—</div>
+        <div class="stat-change" id="statPriorityChange">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Потенциальный рынок</div>
+        <div class="stat-value" id="statMarket">—</div>
+        <div class="stat-change" id="statMarketChange">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-label">Средняя импортозависимость</div>
+        <div class="stat-value" id="statImport">—</div>
+        <div class="stat-change" id="statImportChange">—</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">🏭</div>
+        <div class="stat-label">Потенциал локализации</div>
+        <div class="stat-value" id="statLocalization">—</div>
+        <div class="stat-change" id="statLocalizationChange">—</div>
+    </div>
+</div>
 <div class="card hidden-duplicate">
   <div class="toolbar">
     <div>
@@ -1144,6 +1312,34 @@ let displayCurrency="UZS";
 let displayTheme="light";
 
 const $=id=>document.getElementById(id);
+
+function updateStatsCards() {
+    if (!topProcurementData || !topProcurementData.length) return;
+
+    const priorityCount = topProcurementData.length;
+    const el1 = document.getElementById("statPriorityCount");
+    if (el1) el1.textContent = priorityCount.toLocaleString("ru-RU");
+    const el1c = document.getElementById("statPriorityChange");
+    if (el1c) el1c.textContent = "за текущий период";
+
+    const totalMarket = topProcurementData.reduce((s, x) => s + (x.market || 0), 0);
+    const el2 = document.getElementById("statMarket");
+    if (el2) el2.textContent = (totalMarket / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
+    const el2c = document.getElementById("statMarketChange");
+    if (el2c) el2c.textContent = "по всем товарам";
+
+    const avgImport = topProcurementData.reduce((s, x) => s + (x.id || 0), 0) / priorityCount;
+    const el3 = document.getElementById("statImport");
+    if (el3) el3.textContent = (avgImport * 100).toFixed(1).replace(".", ",") + "%";
+    const el3c = document.getElementById("statImportChange");
+    if (el3c) el3c.textContent = "средняя по всем";
+
+    const totalProd = topProcurementData.reduce((s, x) => s + (x.prodUSD || 0), 0);
+    const el4 = document.getElementById("statLocalization");
+    if (el4) el4.textContent = (totalProd / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
+    const el4c = document.getElementById("statLocalizationChange");
+    if (el4c) el4c.textContent = "по всем товарам";
+}
 // ============================================================
 // КОНФИГ API — ЗАМЕНИТЕ ПОРТ НА ВАШ!
 // ============================================================
@@ -1706,10 +1902,11 @@ function applyDisplayControls(){
   document.querySelectorAll("[data-theme-value]").forEach(b=>b.classList.toggle("active",b.dataset.themeValue===displayTheme));
   syncStickyOffsets();
 }
-function refreshRenderedData(){
-  if(topProducts.length)renderTopProducts();
-  if(current)renderParent(current);
-  if(topProcurementData && topProcurementData.length) renderTopProcurement();   // ← ДОБАВИТЬ
+function refreshRenderedData() {
+    if (topProducts.length) renderTopProducts();
+    if (current) renderParent(current);
+    if (topProcurementData && topProcurementData.length) renderTopProcurement();
+    updateStatsCards();   // ← ДОБАВИТЬ
 }
 document.querySelectorAll("[data-currency]").forEach(btn=>btn.addEventListener("click",()=>{
   displayCurrency=btn.dataset.currency;
