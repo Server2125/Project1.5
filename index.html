@@ -41869,7 +41869,6 @@ function renderTopProcurement(customRows) {
     const data = customRows || topProcurementData;
     
     if (!data || !data.length) {
-    if (!topProcurementData || !topProcurementData.length) {
         host.innerHTML = `<div class="small" style="padding:14px">Нет данных по госзакупкам. Загрузите Excel с листом procurement.</div>`;
         if (footer) footer.classList.add("hidden");
         if (kicker) kicker.textContent = "Сформированный рейтинг госзакупок";
