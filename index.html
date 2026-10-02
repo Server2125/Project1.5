@@ -890,21 +890,70 @@ body[data-theme="dark"] .tariff-row > div:nth-child(3) {
 body[data-theme="dark"] .last-refresh-label {
     color: #91a3b7;
 }
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: #fff;
+    border-bottom: 1px solid #e1e7ee;
+}
+
+.header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    height: 40px;
+    width: auto;
+}
+
+.logo-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #1a2b3c;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
 </style>
 </head>
 <body>
-<header>
+<header class="site-header">
   <div class="header-inner">
-    <div class="header-copy">
-      <h1>Карта производственной кооперации</h1>
+    <div class="header-left">
+      <img src="images/logo-icp.png" alt="ICP" class="logo">
+      <div class="logo-text">
+        <div>ISHLAB CHIQARISH</div>
+        <div>KOOPERATSIYASI</div>
+        <div>TAHLILI</div>
+      </div>
     </div>
     <div class="header-controls">
       <div class="header-control">
         <span class="header-control-label">Валюта</span>
         <div class="segmented" id="currencySwitch">
-        <button type="button" data-currency="UZS" class="active">сум</button>
-        <button type="button" data-currency="USD">USD</button>
-     </div>
+          <button type="button" data-currency="UZS" class="active">UZS</button>
+          <button type="button" data-currency="USD">USD</button>
+        </div>
       </div>
       <div class="header-control">
         <span class="header-control-label">Тема</span>
@@ -913,13 +962,13 @@ body[data-theme="dark"] .last-refresh-label {
           <button type="button" data-theme-value="dark"><span class="theme-icon">◐</span>Тёмная</button>
         </div>
       </div>
-<div class="header-control">
-    <button id="refreshBtn" class="ghost" title="Обновить данные с сервера" type="button">
-        <span class="refresh-icon">🔄</span>
-        <span>Обновить</span>
-    </button>
-    <span id="lastRefreshLabel" class="last-refresh-label">Обновлено: —</span>
-</div>
+      <div class="header-control">
+        <button id="refreshBtn" class="ghost" title="Обновить данные с сервера" type="button">
+          <span class="refresh-icon">🔄</span>
+          <span>Обновить</span>
+        </button>
+        <span id="lastRefreshLabel" class="last-refresh-label">Обновлено: —</span>
+      </div>
     </div>
   </div>
 </header>
