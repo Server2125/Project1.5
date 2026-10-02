@@ -1014,30 +1014,6 @@ body[data-theme="dark"] .last-refresh-label {
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    border-left: 4px solid #3b82f6;   /* синяя полоса слева */
-}
-/* 1. Приоритетные товары — оранжевый */
-.stat-card:nth-child(1) {
-    border-left-color: #f59e0b;
-    background: linear-gradient(180deg, #fff 0%, #fff8ec 100%);
-}
-
-/* 2. Потенциальный рынок — зелёный */
-.stat-card:nth-child(2) {
-    border-left-color: #22a06b;
-    background: linear-gradient(180deg, #fff 0%, #ecfdf5 100%);
-}
-
-/* 3. Импортозависимость — синий */
-.stat-card:nth-child(3) {
-    border-left-color: #3b82f6;
-    background: linear-gradient(180deg, #fff 0%, #eff6ff 100%);
-}
-
-/* 4. Локализация — фиолетовый */
-.stat-card:nth-child(4) {
-    border-left-color: #8b5cf6;
-    background: linear-gradient(180deg, #fff 0%, #f5f3ff 100%);
 }
 
 .stat-icon {
@@ -1093,6 +1069,10 @@ body[data-theme="dark"] .last-refresh-label {
         </div>
       </div>
       <div class="header-control">
+        <button id="refreshBtn" class="ghost" title="Обновить данные с сервера" type="button">
+          <span class="refresh-icon">🔄</span>
+          <span>Обновить</span>
+        </button>
         <span id="lastRefreshLabel" class="last-refresh-label">Обновлено: —</span>
       </div>
     </div>
@@ -1336,25 +1316,29 @@ const $=id=>document.getElementById(id);
 function updateStatsCards() {
     if (!topProcurementData || !topProcurementData.length) return;
 
-    // 1. Приоритетные товары — количество
     const priorityCount = topProcurementData.length;
     const el1 = document.getElementById("statPriorityCount");
     if (el1) el1.textContent = priorityCount.toLocaleString("ru-RU");
+    const el1c = document.getElementById("statPriorityChange");
+    if (el1c) el1c.textContent = "за текущий период";
 
-    // 2. Потенциальный рынок — сумма total
-    const totalSum = topProcurementData.reduce((s, x) => s + (x.total || 0), 0);
+    const totalMarket = topProcurementData.reduce((s, x) => s + (x.market || 0), 0);
     const el2 = document.getElementById("statMarket");
-    if (el2) el2.textContent = (totalSum / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
+    if (el2) el2.textContent = (totalMarket / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
+    const el2c = document.getElementById("statMarketChange");
+    if (el2c) el2c.textContent = "по всем товарам";
 
-    // 3. Средняя импортозависимость — доля industrial от total
-    const totalIndustrial = topProcurementData.reduce((s, x) => s + (x.industrial || 0), 0);
-    const avgImport = totalSum > 0 ? (totalIndustrial / totalSum) : 0;
+    const avgImport = topProcurementData.reduce((s, x) => s + (x.id || 0), 0) / priorityCount;
     const el3 = document.getElementById("statImport");
     if (el3) el3.textContent = (avgImport * 100).toFixed(1).replace(".", ",") + "%";
+    const el3c = document.getElementById("statImportChange");
+    if (el3c) el3c.textContent = "средняя по всем";
 
-    // 4. Потенциал локализации — сумма industrial
+    const totalProd = topProcurementData.reduce((s, x) => s + (x.prodUSD || 0), 0);
     const el4 = document.getElementById("statLocalization");
-    if (el4) el4.textContent = (totalIndustrial / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
+    if (el4) el4.textContent = (totalProd / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
+    const el4c = document.getElementById("statLocalizationChange");
+    if (el4c) el4c.textContent = "по всем товарам";
 }
 // ============================================================
 // КОНФИГ API — ЗАМЕНИТЕ ПОРТ НА ВАШ!
@@ -1697,7 +1681,6 @@ async function loadAllDataFromAPI() {
                  : Array.isArray(json.result) ? json.result
                  : [];
       return [key, rows];
-      updateStatsCards();
     })
   );
 
@@ -1719,7 +1702,6 @@ async function loadAllDataFromAPI() {
   // prepareDataIndexes(), buildTopProducts(), buildTopProcurement(), renderTopProcurement()
   activeTinSet = buildActiveTinSet();
 prepare();
-updateStatsCards();
 return { loaded, failed };
 }
 // ═══════════════════════════════════════════════════
@@ -1920,12 +1902,11 @@ function applyDisplayControls(){
   document.querySelectorAll("[data-theme-value]").forEach(b=>b.classList.toggle("active",b.dataset.themeValue===displayTheme));
   syncStickyOffsets();
 }
-
 function refreshRenderedData() {
     if (topProducts.length) renderTopProducts();
     if (current) renderParent(current);
     if (topProcurementData && topProcurementData.length) renderTopProcurement();
-    updateStatsCards();   // ← ДОЛЖНО БЫТЬ
+    updateStatsCards();   // ← ДОБАВИТЬ
 }
 document.querySelectorAll("[data-currency]").forEach(btn=>btn.addEventListener("click",()=>{
   displayCurrency=btn.dataset.currency;
@@ -1937,22 +1918,7 @@ document.querySelectorAll("[data-theme-value]").forEach(btn=>btn.addEventListene
   applyDisplayControls();
 }));
 applyDisplayControls();
-// Поиск в параметрах анализа
-const analysisSearchEl = document.getElementById("analysisSearch");
-if (analysisSearchEl) {
-    analysisSearchEl.addEventListener("input", () => {
-        const query = analysisSearchEl.value.toLowerCase().trim();
-        if (!query) {
-            renderTopProcurement();
-            return;
-        }
-        const filtered = topProcurementData.filter(x =>
-            (x.code && x.code.toLowerCase().includes(query)) ||
-            (x.name && x.name.toLowerCase().includes(query))
-        );
-        renderTopProcurement(filtered);
-    });
-}
+
 function updateStickySelection(name, code, meta=""){
   if(!name && !code){
     $("stickyCurrent").classList.add("hidden");
@@ -41851,15 +41817,13 @@ function buildTopProcurement() {
     console.log('   💰 Вне реестра:', sumOut);
     console.log('   ✅ Проверка:', sumTot === sumInd + sumOut ? 'OK' : '❌ ОШИБКА');
 }
-function renderTopProcurement(customRows) {
+function renderTopProcurement() {
     const host = $("topProcurementList");
     const footer = $("topProcurementFooter");
     const kicker = $("topProcurementKicker");
     if (!host) return;
     
-    const data = customRows || topProcurementData;
-    
-    if (!data || !data.length) {
+    if (!topProcurementData || !topProcurementData.length) {
         host.innerHTML = `<div class="small" style="padding:14px">Нет данных по госзакупкам. Загрузите Excel с листом procurement.</div>`;
         if (footer) footer.classList.add("hidden");
         if (kicker) kicker.textContent = "Сформированный рейтинг госзакупок";
@@ -41870,7 +41834,7 @@ function renderTopProcurement(customRows) {
     const filter = topProcurementState.filter;
     
     // ✅ ВАЖНО: НЕ фильтруем по валюте! Она влияет только на формат
-    let rows = [...data];  
+    let rows = [...topProcurementData];
     
     if (filter === 'industrial') rows = rows.filter(x => x.industrial > 0);
     else if (filter === 'outside') rows = rows.filter(x => x.outside > 0);
@@ -42465,34 +42429,42 @@ function renderTariffInversion() {
     }
 }
 
-// Ждем, пока страница полностью загрузится
-document.addEventListener('DOMContentLoaded', function() {
-    // Загружаем данные из встроенной базы
-    convertProductsToData();
-
-    // Обновляем sticky-заголовок
-    syncStickyOffsets();
-});
-// ============================================
-// ФУНКЦИИ ДЛЯ РАБОТЫ СО СТАВКАМИ (stavka)
-// ============================================
-
-// Индекс ставок
-let TARIFF_INDEX = [];
-
-// Подготовка индекса ставок
-function prepareTariffIndex() {
-    TARIFF_INDEX = [];
-    for (const r of DATA.stavka) {
-        const rawCode = field(r, ["TNVED", "ТНВЭД", "ТН ВЭД", "tnved"]);
-        const code = tariffCode(rawCode);
-        if (!code || code === "0") continue;
-        const rate = num(field(r, ["Stavka", "Ставка", "stavka"]));
-        TARIFF_INDEX.push({ code, rate, rawCode: txt(rawCode) });
+// Обработчики
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = $('tariffSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            tariffInversionState.search = searchInput.value;
+            tariffInversionState.visible = 25;
+            renderTariffInversion();
+        });
     }
-    // Сортируем по длине кода (самые длинные сначала)
-    TARIFF_INDEX.sort((a, b) => b.code.length - a.code.length || a.code.localeCompare(b.code));
-}
+    const sortBtn = $('tariffSortBtn');
+    if (sortBtn) {
+        sortBtn.addEventListener('click', () => {
+         const order = ['score', 'excess', 'code'];
+         const idx = (order.indexOf(tariffInversionState.sortKey) + 1) % order.length;
+        tariffInversionState.sortKey = order[idx];
+        const labels = { score: 'Совокупный балл ↓', excess: 'Превышение ↓', code: 'Понижение ↑' };
+        sortBtn.textContent = labels[tariffInversionState.sortKey];
+        renderTariffInversion();
+       });
+    }
+    const toggleBtn = $('tariffToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            tariffInversionState.collapsed = !tariffInversionState.collapsed;
+            renderTariffInversion();
+        });
+    }
+    const showMore = $('tariffShowMore');
+    if (showMore) {
+        showMore.addEventListener('click', () => {
+            tariffInversionState.visible += 25;
+            renderTariffInversion();
+        });
+    }
+});
 
 // ═══════════════════════════════════════════════════
 // АВТОЗАГРУЗКА ДАННЫХ ИЗ API ПРИ СТАРТЕ
@@ -42535,56 +42507,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
-
-document.addEventListener("DOMContentLoaded", () => {
-    // ===== ПАРАМЕТРЫ АНАЛИЗА =====
-
-    // Поиск
-    const analysisSearchEl = document.getElementById("analysisSearch");
-if (analysisSearchEl) {
-    analysisSearchEl.addEventListener("input", () => {
-        const query = analysisSearchEl.value.toLowerCase().trim();
-        if (!query) {
-            renderTopProcurement();
-            return;
-        }
-        const filtered = topProcurementData.filter(x =>
-            (x.code && x.code.toLowerCase().includes(query)) ||
-            (x.name && x.name.toLowerCase().includes(query))
-        );
-        renderTopProcurement(filtered);
-    });
-}
-    // Курс
-    const analysisRateEl = document.getElementById("analysisRate");
-    if (analysisRateEl) {
-        analysisRateEl.addEventListener("change", () => {
-            const rateInput = document.getElementById("rate");
-            if (rateInput) rateInput.value = analysisRateEl.value;
-            refreshRenderedData();
-        });
-    }
-
-    // Минимальный балл
-    const analysisMinBallEl = document.getElementById("analysisMinBall");
-    if (analysisMinBallEl) {
-        analysisMinBallEl.addEventListener("change", () => {
-            const minBall = Number(analysisMinBallEl.value) || 0;
-            const filtered = topProcurementData.filter(x => (x.total || 0) >= minBall * 1e9);
-            const original = topProcurementData;
-            topProcurementData = filtered;
-            renderTopProcurement();
-            topProcurementData = original;
-        });
-    }
-
-    // Кнопка "Обновить"
-    const analysisUpdateBtn = document.getElementById("analysisUpdate");
-    if (analysisUpdateBtn) {
-        analysisUpdateBtn.addEventListener("click", () => {
-            refreshData({ userInitiated: true });
-        });
-    }
 </script>
 </body>
 </html>
