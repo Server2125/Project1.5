@@ -903,9 +903,9 @@ body[data-theme="dark"] .last-refresh-label {
     max-width: 1400px;
     padding: 12px 24px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;   /* ← ВСЁ ВЛЕВО */
     align-items: center;
-    gap: 12px;
+    gap: 40px;                      /* ← ОТСТУП между лого и кнопками */
 }
 
 .header-left {
@@ -932,6 +932,7 @@ body[data-theme="dark"] .last-refresh-label {
     display: flex;
     align-items: center;
     gap: 16px;
+    margin-left: auto;              /* ← КНОПКИ ВПРАВО */
 }
 </style>
 </head>
