@@ -42477,12 +42477,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // ФУНКЦИИ ДЛЯ РАБОТЫ СО СТАВКАМИ (stavka)
 // ============================================
 
-// Нормализация кода для ставок (убираем ведущие нули)
-const tariffCode = v => {
-    const s = normCode(v).replace(/^0+/, "");
-    return s || "0";
-};
-
 // Индекс ставок
 let TARIFF_INDEX = [];
 
