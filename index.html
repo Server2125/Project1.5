@@ -42506,6 +42506,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+document.addEventListener("DOMContentLoaded", () => {
+    const analysisUpdateBtn = document.getElementById("analysisUpdate");
+    if (analysisUpdateBtn) {
+        analysisUpdateBtn.addEventListener("click", () => {
+            refreshData({ userInitiated: true });
+        });
+        console.log("✅ Кнопка Обновить (анализ) привязана");
+    }
+});
+
 </script>
 </body>
 </html>
