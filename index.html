@@ -42824,7 +42824,7 @@ function renderImportDependency() {
     }
 
     host.innerHTML = sorted.map((p, i) => {
-        const pctVal = Math.round((p.id || 0) * 100);
+        const pctVal = Math.min(100, Math.round((p.id || 0) * 100));
         return `
         <div class="dependency-row">
             <div class="num">${i + 1}</div>
@@ -42851,7 +42851,7 @@ function renderMarketChart() {
     const data = [...topProducts]
         .filter(p => p.market > 0 && p.prodUSD !== undefined)
         .sort((a, b) => b.market - a.market)
-        .slice(0, 30);
+        .slice(0, 100);
 
     const points = data.map(p => ({
         x: p.market / 1e9,
