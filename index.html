@@ -1218,57 +1218,6 @@ body[data-theme="dark"] .last-refresh-label {
     gap: 16px;
     margin-bottom: 16px;
 }
-.two-cols .card {
-    background: #fff;
-    border-radius: 14px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    border: 1px solid #eef2f7;
-    transition: box-shadow .2s;
-}
-
-.two-cols .card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-}
-
-.dependency-row {
-    display: grid;
-    grid-template-columns: 30px 1fr 200px 60px;
-    gap: 12px;
-    align-items: center;
-    padding: 10px 8px;
-    border-radius: 8px;
-    transition: background .15s;
-    border-bottom: 1px solid #f0f4f9;
-}
-
-.dependency-row:last-child {
-    border-bottom: none;
-}
-
-.dependency-row:hover {
-    background: #f5f8fb;
-}
-
-.dependency-row .num {
-    font-weight: 700;
-    color: #3b82f6;
-    font-size: 13px;
-    background: #eff6ff;
-    width: 26px;
-    height: 26px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.dependency-row .pct {
-    text-align: right;
-    font-weight: 700;
-    color: #22394f;
-    font-size: 14px;
-}
 
 @media (max-width: 1000px) {
     .two-cols { grid-template-columns: 1fr; }
@@ -1281,8 +1230,24 @@ body[data-theme="dark"] .last-refresh-label {
     padding: 10px 0;
 }
 
+.dependency-row {
+    display: grid;
+    grid-template-columns: 30px 1fr 200px 60px;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background .15s;
+}
+
 .dependency-row:hover {
     background: #f5f8fb;
+}
+
+.dependency-row .num {
+    font-weight: 600;
+    color: #61758a;
+    font-size: 12px;
 }
 
 .dependency-row .name {
@@ -1303,20 +1268,6 @@ body[data-theme="dark"] .last-refresh-label {
     background: linear-gradient(90deg, #22a06b, #4ade80);
     border-radius: 10px;
     transition: width .3s;
-}
-.dependency-bar-fill.high {
-    background: linear-gradient(90deg, #16a34a, #22c55e);
-    box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
-}
-
-.dependency-bar-fill.mid {
-    background: linear-gradient(90deg, #f59e0b, #fbbf24);
-    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
-}
-
-.dependency-bar-fill.low {
-    background: linear-gradient(90deg, #e5484d, #f87171);
-    box-shadow: 0 0 8px rgba(229, 72, 77, 0.4);
 }
 
 .dependency-row .pct {
@@ -42882,13 +42833,12 @@ function renderImportDependency() {
 
     host.innerHTML = sorted.map((p, i) => {
         const pctVal = Math.min(100, Math.round((p.id || 0) * 100));
-        const colorClass = pctVal >= 70 ? 'high' : pctVal >= 40 ? 'mid' : 'low';
         return `
         <div class="dependency-row">
             <div class="num">${i + 1}</div>
             <div class="name">${esc(p.name || "Без названия")}</div>
             <div class="dependency-bar">
-                <div class="dependency-bar-fill ${colorClass}" style="width:${pctVal}%"></div>
+                <div class="dependency-bar-fill" style="width:${pctVal}%"></div>
             </div>
             <div class="pct">${pctVal}%</div>
         </div>`;
@@ -42923,51 +42873,45 @@ function renderMarketChart() {
             datasets: [{
                 label: 'Товары',
                 data: points,
-                backgroundColor: 'rgba(59, 130, 246, 0.6)',
-                borderColor: 'rgba(37, 99, 235, 1)',
-                borderWidth: 2,
-                hoverBackgroundColor: 'rgba(37, 99, 235, 0.9)',
-                hoverBorderColor: '#1e40af',
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: 'rgba(59, 130, 246, 1)',
                 borderWidth: 1
             }]
         },
-
-        
-    options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-        legend: { display: false },
-        tooltip: {
-            backgroundColor: 'rgba(30, 41, 59, 0.95)',
-            titleColor: '#fff',
-            bodyColor: '#e2e8f0',
-            padding: 12,
-            cornerRadius: 8,
-            displayColors: false,
-            callbacks: {
-                label: (ctx) => {
-                    const p = data[ctx.dataIndex];
-                    return `${p.name}: рынок ${Math.round(p.market / 1e9)} млрд, производство ${Math.round(p.prodUSD / 1e9)} млрд`;
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const p = data[ctx.dataIndex];
+                            return `${p.name}: рынок ${Math.round(p.market / 1e9)} млрд, производство ${Math.round(p.prodUSD / 1e9)} млрд`;
+                        }
+                    }
                 }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Объём рынка (млрд сум)' } },
+                y: { title: { display: true, text: 'Производство (млрд сум)' } }
             }
         }
-    },
-    scales: {
-        x: {
-            title: { display: true, text: 'Объём рынка (млрд сум)', color: '#61758a', font: { size: 11 } },
-            grid: { color: '#eef2f7' },
-            ticks: { color: '#61758a', font: { size: 11 } }
-        },
-        y: {
-            title: { display: true, text: 'Производство (млрд сум)', color: '#61758a', font: { size: 11 } },
-            grid: { color: '#eef2f7' },
-            ticks: { color: '#61758a', font: { size: 11 } }
-        }
-    }
+    });
 }
-});          // ← закрывает new Chart(canvas, {...})
-}            // ← закрывает function renderMarketChart
+
+document.addEventListener("DOMContentLoaded", () => {
+    const dependencyCard = document.querySelector(".dependency-list");
+    if (!dependencyCard) return;
+    const btnAll = dependencyCard.parentElement.querySelector(".ghost");
+    if (btnAll) {
+        btnAll.addEventListener("click", () => {
+            window._importDependencyLimit = window._importDependencyLimit === 5 ? 50 : 5;
+            btnAll.textContent = window._importDependencyLimit === 5 ? "Все" : "Свернуть";
+            renderImportDependency();
+        });
+    }
+});
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
