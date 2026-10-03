@@ -1065,6 +1065,87 @@ body[data-theme="dark"] .last-refresh-label {
 @media (max-width: 500px) {
     .stats-cards { grid-template-columns: 1fr; }
 }
+
+.top-table-head {
+    display: grid;
+    grid-template-columns: 40px minmax(200px, 1.5fr) 100px 130px 130px 130px 130px 80px 120px;
+    gap: 8px;
+    padding: 10px 12px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #4a5c74;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    background: linear-gradient(180deg, #f7f9fc 0%, #f0f4f9 100%);
+    border-radius: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+}
+
+.top-table-row {
+    display: grid;
+    grid-template-columns: 40px minmax(200px, 1.5fr) 100px 130px 130px 130px 130px 80px 120px;
+    gap: 8px;
+    padding: 10px 12px;
+    align-items: center;
+    border-bottom: 1px solid #e8eef5;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.top-table-row:hover {
+    background: #f5f8fb;
+}
+
+.top-table-row .num {
+    text-align: right;
+    font-weight: 600;
+    color: #22394f;
+    font-size: 13px;
+}
+
+.top-table-row .name-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.top-table-row .name-cell .name {
+    font-weight: 600;
+    color: #1a2b3c;
+    font-size: 13px;
+}
+
+.top-table-row .name-cell .code {
+    font-size: 11px;
+    color: #61758a;
+}
+
+.potential-bar {
+    position: relative;
+    height: 8px;
+    background: #e8eef5;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.potential-bar-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    background: linear-gradient(90deg, #22a06b, #4ade80);
+    border-radius: 4px;
+}
+
+.potential-pct {
+    font-size: 12px;
+    font-weight: 600;
+    color: #22a06b;
+}
+
 </style>
 </head>
 <body>
@@ -1208,9 +1289,22 @@ body[data-theme="dark"] .last-refresh-label {
 </div>
     </div>
   </div>
-  <div id="topProductsListWrap" class="top-scroll">
-    <div id="topProductsList"><div class="small" style="padding:10px">Загрузите Excel, чтобы сформировать рейтинг.</div></div>
-  </div>
+  <<div id="topProductsListWrap" class="top-scroll">
+    <div id="topProductsList">
+        <div class="top-table-head">
+            <div>№</div>
+            <div>ТОВАР И КОД ТН ВЭД</div>
+            <div>ПОТЕНЦИАЛ</div>
+            <div>РЫНОК</div>
+            <div>ИМПОРТОЗАВИСИМОСТЬ</div>
+            <div>ЭКСПОРТ</div>
+            <div>ПРОИЗВОДСТВО</div>
+            <div>ОБЩИЙ БАЛЛ</div>
+            <div>РЕКОМЕНДАЦИЯ</div>
+        </div>
+        <div id="topProductsBody"></div>
+    </div>
+</div>
   <div id="topProductsFooter" class="top-footer hidden">
     <span id="topCountInfo" class="count-info"></span>
     <button id="showMoreTop" class="show-more">Показать ещё 10</button>
@@ -2439,51 +2533,60 @@ function buildTopProducts() {
     });
 }
 
+function renderTopProducts() {
+    const host = document.getElementById("topProductsBody");
+    const footer = document.getElementById("topProductsFooter");
+    if (!host) return;
 
+    if (!topProducts.length) {
+        host.innerHTML = `<div class="small" style="padding:14px">Загрузите данные для рейтинга.</div>`;
+        if (footer) footer.classList.add("hidden");
+        return;
+    }
 
-function renderTopProducts(){
-  const host=$("topProductsList"), footer=$("topProductsFooter");
-  if(!host)return;
-  if(!topProducts.length){
-    host.innerHTML=`<div class="small" style="padding:10px">После загрузки Excel здесь появятся товары, которые одновременно имеют большой рынок, высокую импортозависимость, низкую локализацию и низкое производство.</div>`;
-    footer.classList.add("hidden");
-    return;
-  }
-  const shown=topProducts.slice(0,topVisibleCount);
- host.innerHTML=`<div class="top-list">${shown.map((p,i)=>{
-    const rr=recommendationShort(p);
-    return `
-    <div class="top-item" data-top-code="${p.code}" title="Открыть полную информацию по товару">
-        <div class="top-rank-wrap">
-            <div class="top-rank">${i+1}</div>
-        </div>
-        <div class="top-item-title">
-            <div class="top-name">${esc(p.name||"Без названия")}</div>
-            <div class="top-code">${p.code}</div>
-        </div>
-        <div class="top-val"><div class="lbl">Рынок</div><div class="num">${usd(p.market)}</div></div>
-        <div class="top-val"><div class="lbl">Импортозависимость</div><div class="num">${p.id===null?'—':pct(p.id)}</div></div>
-        <div class="top-val export-col"><div class="lbl">Экспорт</div><div class="num">${usd(p.exportUSD)}</div></div>
-        <div class="top-val prod-col"><div class="lbl">Производство</div><div class="num">${usd(p.prodUSD)}</div></div>
-        <div class="top-rec"><div class="lbl">Рекомендация</div><span class="compact-badge ${rr.cls}" title="${esc(rr.full)}">${esc(rr.short)}</span></div>
-        <div class="top-val"><div class="lbl">СОВОКУПНЫЙ БАЛЛ</div><div class="num">${Math.round(p.priorityScore)}</div></div>
-    </div>`;
-  }).join("")}</div>`;
+    const shown = topProducts.slice(0, topVisibleCount);
 
+    host.innerHTML = shown.map((p, i) => {
+        const rr = recommendationShort(p);
+        const potential = Math.round(p.priorityScore || 0);
+        const potentialPct = Math.min(potential, 100);
 
-  host.querySelectorAll("[data-top-code]").forEach(el=>{
-    el.onclick=()=>{
-      const p=parentIndex.get(el.dataset.topCode);
-      if(p)selectParent(p,true);
-    };
-  });
-  footer.classList.remove("hidden");
-  $("topCountInfo").textContent=`Показано ${shown.length} из ${topProducts.length} · рейтинг по совокупному соответствию условиям`;
-  const btn=$("showMoreTop");
-  btn.classList.toggle("hidden",shown.length>=topProducts.length || topListCollapsed);
-  footer.classList.toggle("hidden", topListCollapsed);
-  $("topProductsListWrap").classList.toggle("hidden", topListCollapsed);
-  $("topToggleBtn").textContent=topListCollapsed?"Отобразить список":"Скрыть список";
+        return `
+        <div class="top-table-row" data-top-code="${p.code}">
+            <div class="num">${i + 1}</div>
+            <div class="name-cell">
+                <div class="name">${esc(p.name || "Без названия")}</div>
+                <div class="code">ТН ВЭД: ${p.code}</div>
+            </div>
+            <div>
+                <div class="potential-pct">${potentialPct}%</div>
+                <div class="potential-bar">
+                    <div class="potential-bar-fill" style="width:${potentialPct}%"></div>
+                </div>
+            </div>
+            <div class="num">${usd(p.market)}</div>
+            <div class="num">${p.id === null ? '—' : pct(p.id)}</div>
+            <div class="num">${usd(p.exportUSD)}</div>
+            <div class="num">${usd(p.prodUSD)}</div>
+            <div class="num">${Math.round(p.priorityScore || 0)}</div>
+            <div><span class="compact-badge ${rr.cls}">${esc(rr.short)}</span></div>
+        </div>`;
+    }).join('');
+
+    if (footer) {
+        footer.classList.remove("hidden");
+        document.getElementById("topCountInfo").textContent =
+            `Показано ${shown.length} из ${topProducts.length}`;
+        document.getElementById("showMoreTop").classList.toggle("hidden",
+            shown.length >= topProducts.length);
+    }
+
+    host.querySelectorAll("[data-top-code]").forEach(el => {
+        el.onclick = () => {
+            const p = parentIndex.get(el.dataset.topCode);
+            if (p) selectParent(p, true);
+        };
+    });
 }
 
 $("showMoreTop").onclick=()=>{ topVisibleCount+=10; renderTopProducts(); };
