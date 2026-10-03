@@ -1068,7 +1068,7 @@ body[data-theme="dark"] .last-refresh-label {
 
 .top-table-head {
     display: grid;
-    grid-template-columns: 40px minmax(200px, 1.5fr) 100px 130px 130px 130px 130px 80px 120px;
+    grid-template-columns: 40px minmax(180px, 1.5fr) 90px 130px 150px 140px 150px 70px 110px;
     gap: 8px;
     padding: 10px 12px;
     font-size: 10.5px;
@@ -1092,6 +1092,18 @@ body[data-theme="dark"] .last-refresh-label {
     border-bottom: 1px solid #e8eef5;
     cursor: pointer;
     transition: background .15s;
+}
+.top-table-head > div {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 4px;
+}
+
+.top-table-head > div:nth-child(5),
+.top-table-head > div:nth-child(6),
+.top-table-head > div:nth-child(7) {
+    text-align: right;
 }
 
 .top-table-row:hover {
