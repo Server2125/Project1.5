@@ -1211,6 +1211,77 @@ body[data-theme="dark"] .last-refresh-label {
     color: #1e40af;
     border-bottom: 2px solid #3b82f6;
 }
+
+.two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 1000px) {
+    .two-cols { grid-template-columns: 1fr; }
+}
+
+.dependency-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px 0;
+}
+
+.dependency-row {
+    display: grid;
+    grid-template-columns: 30px 1fr 200px 60px;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 8px;
+    transition: background .15s;
+}
+
+.dependency-row:hover {
+    background: #f5f8fb;
+}
+
+.dependency-row .num {
+    font-weight: 600;
+    color: #61758a;
+    font-size: 12px;
+}
+
+.dependency-row .name {
+    font-size: 13px;
+    color: #1a2b3c;
+    font-weight: 500;
+}
+
+.dependency-bar {
+    height: 20px;
+    background: #e8eef5;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.dependency-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22a06b, #4ade80);
+    border-radius: 10px;
+    transition: width .3s;
+}
+
+.dependency-row .pct {
+    text-align: right;
+    font-weight: 700;
+    color: #22394f;
+    font-size: 13px;
+}
+
+.chart-wrap {
+    position: relative;
+    height: 320px;
+    padding: 10px 0;
+}
 </style>
 </head>
 <body>
@@ -1374,6 +1445,36 @@ body[data-theme="dark"] .last-refresh-label {
     <span id="topCountInfo" class="count-info"></span>
     <button id="showMoreTop" class="show-more">Показать ещё 10</button>
   </div>
+</div>
+
+<div class="two-cols">
+    <div class="card">
+        <div class="top-head">
+            <div>
+                <h2 class="h2title"><span class="sec-ico">📊</span><span>Товары с высокой импортозависимостью</span></h2>
+                <div class="small">Товары с наибольшей долей импорта во внутреннем потреблении</div>
+            </div>
+            <button class="ghost">Все</button>
+        </div>
+        <div id="importDependencyList" class="dependency-list">
+            <div class="small">Загрузка...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="top-head">
+            <div>
+                <h2 class="h2title"><span class="sec-ico">📈</span><span>Рынок и местное производство</span></h2>
+                <div class="small">Каждая точка — отдельный товар. Размер точки — объём рынка.</div>
+            </div>
+            <select id="chartRegionFilter" class="ghost">
+                <option value="all">Все регионы</option>
+            </select>
+        </div>
+        <div class="chart-wrap">
+            <canvas id="marketChart"></canvas>
+        </div>
+    </div>
 </div>
 <div id="topProcurementCard" class="card">
   <div class="top-head">
@@ -1627,6 +1728,92 @@ $("procurementFileInput").addEventListener("change", async (e) => {
     }
 });
 
+// Товары с высокой импортозависимостью
+function renderImportDependency() {
+    const host = document.getElementById("importDependencyList");
+    if (!host) return;
+
+    // Берём topProducts, сортируем по импортозависимости
+    const sorted = [...topProducts]
+        .filter(p => p.id !== null && p.id !== undefined)
+        .sort((a, b) => b.id - a.id)
+        .slice(0, 5);
+
+    if (!sorted.length) {
+        host.innerHTML = `<div class="small">Нет данных</div>`;
+        return;
+    }
+
+    host.innerHTML = sorted.map((p, i) => {
+        const pctVal = Math.round((p.id || 0) * 100);
+        return `
+        <div class="dependency-row">
+            <div class="num">${i + 1}</div>
+            <div class="name">${esc(p.name || "Без названия")}</div>
+            <div class="dependency-bar">
+                <div class="dependency-bar-fill" style="width:${pctVal}%"></div>
+            </div>
+            <div class="pct">${pctVal}%</div>
+        </div>`;
+    }).join('');
+}
+
+// Точечный график: рынок vs производство
+let marketChartInstance = null;
+
+function renderMarketChart() {
+    const canvas = document.getElementById("marketChart");
+    if (!canvas) return;
+
+    // Уничтожаем старый график
+    if (marketChartInstance) {
+        marketChartInstance.destroy();
+    }
+
+    // Данные: топ-30 по рынку
+    const data = [...topProducts]
+        .filter(p => p.market > 0 && p.prodUSD !== undefined)
+        .sort((a, b) => b.market - a.market)
+        .slice(0, 30);
+
+    const points = data.map(p => ({
+        x: p.market / 1e9,       // в млрд
+        y: p.prodUSD / 1e9,      // в млрд
+        r: Math.max(4, Math.min(20, Math.sqrt(p.market / 1e12) * 10))
+    }));
+
+    marketChartInstance = new Chart(canvas, {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                label: 'Товары',
+                data: points,
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const p = data[ctx.dataIndex];
+                            return `${p.name}: рынок ${Math.round(p.market / 1e9)} млрд, производство ${Math.round(p.prodUSD / 1e9)} млрд`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Объём рынка (млрд сум)' } },
+                y: { title: { display: true, text: 'Производство (млрд сум)' } }
+            }
+        }
+    });
+}
 // ============================================================
 // КЛАССИФИКАЦИЯ ПОСТАВЩИКОВ (реестр предприятий)
 // ============================================================
@@ -2057,6 +2244,8 @@ function refreshRenderedData() {
     if (current) renderParent(current);
     if (topProcurementData && topProcurementData.length) renderTopProcurement();
     updateStatsCards();   // ← ДОБАВЛЕНО
+    renderImportDependency();   // ← ДОБАВИТЬ
+    renderMarketChart();        // ← ДОБАВИТЬ
 }
 
 function updateStatsCards() {
@@ -42706,5 +42895,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 </script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>
 </html>
