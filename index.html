@@ -42964,21 +42964,8 @@ function renderMarketChart() {
             grid: { color: '#eef2f7' },
             ticks: { color: '#61758a', font: { size: 11 } }
         }
-    });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-    const dependencyCard = document.querySelector(".dependency-list");
-    if (!dependencyCard) return;
-    const btnAll = dependencyCard.parentElement.querySelector(".ghost");
-    if (btnAll) {
-        btnAll.addEventListener("click", () => {
-            window._importDependencyLimit = window._importDependencyLimit === 5 ? 50 : 5;
-            btnAll.textContent = window._importDependencyLimit === 5 ? "Все" : "Свернуть";
-            renderImportDependency();
-        });
     }
-});
+}
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
