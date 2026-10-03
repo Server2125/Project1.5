@@ -1286,6 +1286,123 @@ body[data-theme="dark"] .last-refresh-label {
     height: 320px;
     padding: 10px 0;
 }
+
+.tariff-table-head {
+    display: grid;
+    grid-template-columns: 40px 110px minmax(220px, 2fr) 160px 180px 90px 90px 130px;
+    gap: 8px;
+    padding: 12px 14px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: #4a5c74;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    background: linear-gradient(180deg, #eaf4ff 0%, #dbeafe 100%);
+    border-radius: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    border-bottom: 2px solid #3b82f6;
+}
+
+.tariff-table-row {
+    display: grid;
+    grid-template-columns: 40px 110px minmax(220px, 2fr) 160px 180px 90px 90px 130px;
+    gap: 8px;
+    padding: 10px 14px;
+    align-items: center;
+    border-bottom: 1px solid #e8eef5;
+    cursor: pointer;
+    transition: background .15s;
+}
+
+.tariff-table-row:nth-child(even) {
+    background: #fafbfc;
+}
+
+.tariff-table-row:hover {
+    background: #f0f7ff;
+    box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.tariff-table-row .num {
+    text-align: center;
+    font-weight: 700;
+    color: #3b82f6;
+    font-size: 13px;
+}
+
+.tariff-table-row .code {
+    font-size: 12px;
+    color: #61758a;
+    font-family: monospace;
+}
+
+.tariff-table-row .name {
+    font-size: 13px;
+    color: #1a2b3c;
+    font-weight: 500;
+    line-height: 1.3;
+}
+
+.tariff-rate-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.tariff-rate-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: #22a06b;
+}
+
+.tariff-bar {
+    height: 10px;
+    background: #e8eef5;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.tariff-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    border-radius: 5px;
+    transition: width .3s;
+    box-shadow: 0 0 6px rgba(34, 197, 94, 0.3);
+}
+
+.tariff-potential {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    background: #e6f7ee;
+    color: #22a06b;
+    border: 1px solid #b8e6ce;
+    justify-content: center;
+}
+
+.tariff-potential.high {
+    background: #e6f7ee;
+    color: #16a34a;
+    border-color: #86efac;
+}
+
+.tariff-potential.mid {
+    background: #fff4e6;
+    color: #f59e0b;
+    border-color: #fcd9a3;
+}
+
+.tariff-potential.low {
+    background: #ffe9e9;
+    color: #e5484d;
+    border-color: #f5b8b8;
+}
 </style>
 </head>
 <body>
@@ -1521,7 +1638,19 @@ body[data-theme="dark"] .last-refresh-label {
     </div>
   </div>
   <div id="tariffInversionWrap" class="proc-wrap">
-    <div id="tariffInversionList"></div>
+    <div id="tariffInversionList">
+    <div class="tariff-table-head">
+        <div>№</div>
+        <div>КОД ТН ВЭД</div>
+        <div>НАИМЕНОВАНИЕ ТОВАРА</div>
+        <div>СТАВКА ТОВАРА</div>
+        <div>СУММА СТАВОК КОМПОНЕНТОВ</div>
+        <div>КОМПОНЕНТОВ</div>
+        <div>ОБЩИЙ БАЛЛ</div>
+        <div>ПОТЕНЦИАЛ</div>
+    </div>
+    <div id="tariffInversionBody"></div>
+</div>
   </div>
   <div id="tariffInversionFooter" class="top-footer hidden">
     <span id="tariffInversionCountInfo" class="count-info"></span>
@@ -42655,72 +42784,67 @@ function buildTariffInversion() {
 }
 
 function renderTariffInversion() {
-    const host = $('tariffInversionList');
-    const footer = $('tariffInversionFooter');
-    const kicker = $('tariffInversionKicker');
+    const host = document.getElementById("tariffInversionBody");
+    const footer = document.getElementById("tariffInversionFooter");
     if (!host) return;
-    
-    if (!tariffInversionData.length) {
-        host.innerHTML = `<div class="small" style="padding:14px">Нет данных. Загрузите Excel с листами connection и stavka.</div>`;
+
+    if (!tariffInversionData || !tariffInversionData.length) {
+        host.innerHTML = `<div class="small" style="padding:14px">Нет данных</div>`;
         if (footer) footer.classList.add('hidden');
         return;
     }
-
-    $('tariffInversionCard')?.classList.remove('hidden');
 
     let rows = [...tariffInversionData];
     const search = (tariffInversionState.search || '').toLowerCase();
     if (search) {
         rows = rows.filter(x =>
-            x.code.toLowerCase().includes(search) ||
+            (x.code || '').toLowerCase().includes(search) ||
             (x.name || '').toLowerCase().includes(search)
         );
     }
-    
+
     if (tariffInversionState.sortKey === 'score') rows.sort((a, b) => b.totalScore - a.totalScore);
     else if (tariffInversionState.sortKey === 'excess') rows.sort((a, b) => b.excess - a.excess);
     else rows.sort((a, b) => a.code.localeCompare(b.code));
-    
+
     const shown = rows.slice(0, tariffInversionState.visible);
-    
-    const numFmt = (v) => Number.isFinite(v) ? v.toFixed(0) + '%' : '—';
-    const badgeCls = (v) => v >= 50 ? 'high' : v >= 20 ? 'mid' : 'low';
-    
-    const header = `
-        <div class="tariff-head">
-            <div>№</div>
-            <div>ТН ВЭД</div>
-            <div>НАИМЕНОВАНИЕ ТОВАРА</div>
-            <div style="text-align:right">СТАВКА ТОВАРА</div>
-            <div style="text-align:right">СУММА СТАВОК КОМПОНЕНТОВ</div>
-            <div style="text-align:right">КОМПОНЕНТОВ</div>
-            <div style="text-align:right">СОВОКУПНЫЙ БАЛЛ</div>
-        </div>
-    `;
-    
-    const body = shown.map((p, i) => `
-        <div class="tariff-row" data-code="${p.code}">
-            <div class="numcell">${i + 1}</div>
+
+    host.innerHTML = shown.map((p, i) => {
+        const parentRate = p.parentRate || 0;
+        const compSum = p.sumComponents || 0;
+        const score = Math.round(p.totalScore || p.excess || 0);
+        const potentialClass = score >= 70 ? 'high' : score >= 40 ? 'mid' : 'low';
+        const potentialText = score >= 70 ? 'Высокий' : score >= 40 ? 'Средний' : 'Низкий';
+
+        return `
+        <div class="tariff-table-row" data-code="${p.code}">
+            <div class="num">${i + 1}</div>
             <div class="code">${p.code}</div>
-            <div>${esc(p.name || 'Без названия')}</div>
-            <div class="numcell">${numFmt(p.parentRate)}</div>
-            <div class="numcell">${numFmt(p.sumComponents)}</div>
-            <div class="numcell">${p.componentCount}</div>
-            <div class="numcell">${Math.round(p.totalScore)}</div>
-        </div>
-    `).join('');
-    
-    host.innerHTML = header + body;
-    
+            <div class="name">${esc(p.name || 'Без названия')}</div>
+            <div class="tariff-rate-cell">
+                <div class="tariff-rate-pct">${parentRate.toFixed(0)}%</div>
+                <div class="tariff-bar">
+                    <div class="tariff-bar-fill" style="width:${Math.min(parentRate, 100)}%"></div>
+                </div>
+            </div>
+            <div class="tariff-rate-cell">
+                <div class="tariff-rate-pct">${compSum.toFixed(0)}%</div>
+                <div class="tariff-bar">
+                    <div class="tariff-bar-fill" style="width:${Math.min(compSum, 100)}%"></div>
+                </div>
+            </div>
+            <div class="num">${p.componentCount || 0}</div>
+            <div class="num">${score}</div>
+            <div><span class="tariff-potential ${potentialClass}">${potentialText}</span></div>
+        </div>`;
+    }).join('');
+
     if (footer) {
         footer.classList.remove('hidden');
-        $('tariffInversionCountInfo').textContent = `Показано ${shown.length} из ${rows.length}`;
-        $('tariffShowMore').classList.toggle('hidden', shown.length >= rows.length);
-    }
-    
-    host.parentElement.classList.toggle('hidden', tariffInversionState.collapsed);
-    if ($('tariffToggleBtn')) {
-        $('tariffToggleBtn').textContent = tariffInversionState.collapsed ? 'Показать' : 'Скрыть';
+        document.getElementById('tariffInversionCountInfo').textContent =
+            `Показано ${shown.length} из ${rows.length}`;
+        document.getElementById('tariffShowMore').classList.toggle('hidden',
+            shown.length >= rows.length);
     }
 }
 
