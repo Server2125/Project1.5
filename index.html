@@ -1157,7 +1157,60 @@ body[data-theme="dark"] .last-refresh-label {
     font-weight: 600;
     color: #22a06b;
 }
+/* Чередование строк — зебра */
+.top-table-row:nth-child(even) {
+    background: #fafbfc;
+}
 
+.top-table-row:nth-child(odd) {
+    background: #fff;
+}
+
+/* Подсветка при наведении — уже есть, оставляем */
+.top-table-row:hover {
+    background: #f0f7ff;
+    box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+/* Цвет полосы — зависит от процента */
+.potential-bar-fill.low {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+.potential-bar-fill.mid {
+    background: linear-gradient(90deg, #22a06b, #4ade80);
+}
+.potential-bar-fill.high {
+    background: linear-gradient(90deg, #16a34a, #22c55e);
+}
+
+/* Рекомендация — цвет */
+.compact-badge.green {
+    background: #e6f7ee;
+    color: #22a06b;
+    border: 1px solid #b8e6ce;
+}
+.compact-badge.orange {
+    background: #fff4e6;
+    color: #f59e0b;
+    border: 1px solid #fcd9a3;
+}
+.compact-badge.red {
+    background: #ffe9e9;
+    color: #e5484d;
+    border: 1px solid #f5b8b8;
+}
+.compact-badge.gray {
+    background: #f0f2f5;
+    color: #61758a;
+    border: 1px solid #d8e2ec;
+}
+
+/* Заголовок таблицы — синий градиент */
+.top-table-head {
+    background: linear-gradient(180deg, #eaf4ff 0%, #dbeafe 100%);
+    color: #1e40af;
+    border-bottom: 2px solid #3b82f6;
+}
 </style>
 </head>
 <body>
@@ -2573,7 +2626,7 @@ function renderTopProducts() {
             <div>
                 <div class="potential-pct">${potentialPct}%</div>
                 <div class="potential-bar">
-                    <div class="potential-bar-fill" style="width:${potentialPct}%"></div>
+                    <div class="potential-bar-fill ${potentialPct >= 50 ? 'high' : potentialPct >= 20 ? 'mid' : 'low'}" style="width:${potentialPct}%"></div>
                 </div>
             </div>
             <div class="num">${usd(p.market)}</div>
