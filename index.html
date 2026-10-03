@@ -1728,92 +1728,6 @@ $("procurementFileInput").addEventListener("change", async (e) => {
     }
 });
 
-// Товары с высокой импортозависимостью
-function renderImportDependency() {
-    const host = document.getElementById("importDependencyList");
-    if (!host) return;
-
-    // Берём topProducts, сортируем по импортозависимости
-    const sorted = [...topProducts]
-        .filter(p => p.id !== null && p.id !== undefined)
-        .sort((a, b) => b.id - a.id)
-        .slice(0, 5);
-
-    if (!sorted.length) {
-        host.innerHTML = `<div class="small">Нет данных</div>`;
-        return;
-    }
-
-    host.innerHTML = sorted.map((p, i) => {
-        const pctVal = Math.round((p.id || 0) * 100);
-        return `
-        <div class="dependency-row">
-            <div class="num">${i + 1}</div>
-            <div class="name">${esc(p.name || "Без названия")}</div>
-            <div class="dependency-bar">
-                <div class="dependency-bar-fill" style="width:${pctVal}%"></div>
-            </div>
-            <div class="pct">${pctVal}%</div>
-        </div>`;
-    }).join('');
-}
-
-// Точечный график: рынок vs производство
-let marketChartInstance = null;
-
-function renderMarketChart() {
-    const canvas = document.getElementById("marketChart");
-    if (!canvas) return;
-
-    // Уничтожаем старый график
-    if (marketChartInstance) {
-        marketChartInstance.destroy();
-    }
-
-    // Данные: топ-30 по рынку
-    const data = [...topProducts]
-        .filter(p => p.market > 0 && p.prodUSD !== undefined)
-        .sort((a, b) => b.market - a.market)
-        .slice(0, 30);
-
-    const points = data.map(p => ({
-        x: p.market / 1e9,       // в млрд
-        y: p.prodUSD / 1e9,      // в млрд
-        r: Math.max(4, Math.min(20, Math.sqrt(p.market / 1e12) * 10))
-    }));
-
-    marketChartInstance = new Chart(canvas, {
-        type: 'bubble',
-        data: {
-            datasets: [{
-                label: 'Товары',
-                data: points,
-                backgroundColor: 'rgba(59, 130, 246, 0.5)',
-                borderColor: 'rgba(59, 130, 246, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: (ctx) => {
-                            const p = data[ctx.dataIndex];
-                            return `${p.name}: рынок ${Math.round(p.market / 1e9)} млрд, производство ${Math.round(p.prodUSD / 1e9)} млрд`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Объём рынка (млрд сум)' } },
-                y: { title: { display: true, text: 'Производство (млрд сум)' } }
-            }
-        }
-    });
-}
 // ============================================================
 // КЛАССИФИКАЦИЯ ПОСТАВЩИКОВ (реестр предприятий)
 // ============================================================
@@ -42894,6 +42808,89 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// Товары с высокой импортозависимостью
+function renderImportDependency() {
+    const host = document.getElementById("importDependencyList");
+    if (!host) return;
+
+    const sorted = [...topProducts]
+        .filter(p => p.id !== null && p.id !== undefined)
+        .sort((a, b) => b.id - a.id)
+        .slice(0, 5);
+
+    if (!sorted.length) {
+        host.innerHTML = `<div class="small">Нет данных</div>`;
+        return;
+    }
+
+    host.innerHTML = sorted.map((p, i) => {
+        const pctVal = Math.round((p.id || 0) * 100);
+        return `
+        <div class="dependency-row">
+            <div class="num">${i + 1}</div>
+            <div class="name">${esc(p.name || "Без названия")}</div>
+            <div class="dependency-bar">
+                <div class="dependency-bar-fill" style="width:${pctVal}%"></div>
+            </div>
+            <div class="pct">${pctVal}%</div>
+        </div>`;
+    }).join('');
+}
+
+// Точечный график
+let marketChartInstance = null;
+
+function renderMarketChart() {
+    const canvas = document.getElementById("marketChart");
+    if (!canvas) return;
+
+    if (marketChartInstance) {
+        marketChartInstance.destroy();
+    }
+
+    const data = [...topProducts]
+        .filter(p => p.market > 0 && p.prodUSD !== undefined)
+        .sort((a, b) => b.market - a.market)
+        .slice(0, 30);
+
+    const points = data.map(p => ({
+        x: p.market / 1e9,
+        y: p.prodUSD / 1e9,
+        r: Math.max(4, Math.min(20, Math.sqrt(p.market / 1e12) * 10))
+    }));
+
+    marketChartInstance = new Chart(canvas, {
+        type: 'bubble',
+        data: {
+            datasets: [{
+                label: 'Товары',
+                data: points,
+                backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: (ctx) => {
+                            const p = data[ctx.dataIndex];
+                            return `${p.name}: рынок ${Math.round(p.market / 1e9)} млрд, производство ${Math.round(p.prodUSD / 1e9)} млрд`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Объём рынка (млрд сум)' } },
+                y: { title: { display: true, text: 'Производство (млрд сум)' } }
+            }
+        }
+    });
+}
 </script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </body>
