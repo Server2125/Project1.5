@@ -42768,6 +42768,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     try {
         const result = await loadAllDataFromAPI();
         console.log('✅ Данные загружены:', result);
+        // Ждём, пока данные обработаются, потом обновляем блоки
+        setTimeout(() => {
+            updateStatsCards();
+            renderImportDependency();
+            renderMarketChart();
+            console.log('📊 Все блоки обновлены');
+        }, 800);
     } catch (err) {
         console.error('❌ Ошибка загрузки:', err);
         setStatus('❌ Ошибка загрузки данных: ' + err.message);
