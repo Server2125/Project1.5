@@ -3011,7 +3011,7 @@ function buildTree(nodes){
                         <div class="tree-code">${node.code}</div>
                     </div>
                     <div class="tree-stats">
-                         Импорт ${usd(node.importUSD)} ·
+                         Импорт ${usd(node.importUSD)} · Производство ${usd(node.prodUSD)} ·
                          Импортозависимость ${node.id === null ? '—' : pct(node.id)} ·
                         Ставка: <span class="tariff-rate ${node.tariff && node.tariff.found ? '' : 'missing'}" title="${node.tariff && node.tariff.found ? 'Ставка по префиксу ' + node.tariff.matchedCode : 'Ставка не найдена'}">${rateText(node.tariff)}</span>
                     </div>
