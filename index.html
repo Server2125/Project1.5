@@ -42792,6 +42792,8 @@ function renderTariffInversion() {
         host.innerHTML = `<div class="small" style="padding:14px">Нет данных</div>`;
         if (footer) footer.classList.add('hidden');
         return;
+
+    document.getElementById('tariffInversionCard')?.classList.remove('hidden');
     }
 
     let rows = [...tariffInversionData];
