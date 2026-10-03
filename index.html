@@ -1313,33 +1313,6 @@ let displayTheme="light";
 
 const $=id=>document.getElementById(id);
 
-function updateStatsCards() {
-    if (!topProcurementData || !topProcurementData.length) return;
-
-    const priorityCount = topProcurementData.length;
-    const el1 = document.getElementById("statPriorityCount");
-    if (el1) el1.textContent = priorityCount.toLocaleString("ru-RU");
-    const el1c = document.getElementById("statPriorityChange");
-    if (el1c) el1c.textContent = "за текущий период";
-
-    const totalMarket = topProcurementData.reduce((s, x) => s + (x.market || 0), 0);
-    const el2 = document.getElementById("statMarket");
-    if (el2) el2.textContent = (totalMarket / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
-    const el2c = document.getElementById("statMarketChange");
-    if (el2c) el2c.textContent = "по всем товарам";
-
-    const avgImport = topProcurementData.reduce((s, x) => s + (x.id || 0), 0) / priorityCount;
-    const el3 = document.getElementById("statImport");
-    if (el3) el3.textContent = (avgImport * 100).toFixed(1).replace(".", ",") + "%";
-    const el3c = document.getElementById("statImportChange");
-    if (el3c) el3c.textContent = "средняя по всем";
-
-    const totalProd = topProcurementData.reduce((s, x) => s + (x.prodUSD || 0), 0);
-    const el4 = document.getElementById("statLocalization");
-    if (el4) el4.textContent = (totalProd / 1e12).toFixed(1).replace(".", ",") + " трлн сум";
-    const el4c = document.getElementById("statLocalizationChange");
-    if (el4c) el4c.textContent = "по всем товарам";
-}
 // ============================================================
 // КОНФИГ API — ЗАМЕНИТЕ ПОРТ НА ВАШ!
 // ============================================================
