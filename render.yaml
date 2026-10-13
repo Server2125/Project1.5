@@ -10,12 +10,3 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.11.0"
-
-  # ═══════════════════════════════════════
-  # ФРОНТЕНД (статика)
-  # ═══════════════════════════════════════
-  - type: web
-    name: cooperation-map
-    env: static
-    plan: free
-    region: frankfurt staticPublishPath: frontend    # ← index.html в папке frontend
