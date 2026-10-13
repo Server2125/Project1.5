@@ -21,5 +21,4 @@ services:
     name: cooperation-map
     env: static
     plan: free
-    region: frankfurt
-    staticPublishPath: .                             # ← index.html в корне
+    region: frankfurt staticPublishPath: frontend    # ← index.html в папке frontend

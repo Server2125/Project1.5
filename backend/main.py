@@ -222,13 +222,12 @@ def health():
     }
 
 
-from fastapi.responses import FileResponse
-from pathlib import Path
+f# ═══ Раздача фронта — после всех API ═══
+from fastapi.staticfiles import StaticFiles
 
-@app.get("/")
-def root():
-    index_path = Path(__file__).parent.parent / "index.html"
-    return FileResponse(index_path)
+frontend_path = Path(__file__).parent.parent / "frontend"
+if frontend_path.exists():
+    app.mount("/", StaticFiles(directory=str(frontend_path), html=True), name="frontend")
 
 
 # ============================================================

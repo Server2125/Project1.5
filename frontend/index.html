@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта производственной кооперации</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!-- ═══════════════════════════════════════════════════════════
+     ВЕРХНЯЯ ПОЛОСКА С УТИЛИТАМИ
+     ═══════════════════════════════════════════════════════════ -->
+<div class="top-bar">
+    <div class="top-bar-inner">
+        <div class="top-bar-left">
+            <a href="#" class="top-bar-link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 20l-5.447-2.724A1 1 0 0 1 3 16.382V5.618a1 1 0 0 1 1.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0 0 21 18.382V7.618a1 1 0 0 0-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+                Карта сайта
+            </a>
+        </div>
+        <div class="top-bar-right">
+            <div class="lang-switch">
+                <span>O'zbekcha</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </div>
+            <button class="top-icon-btn" id="themeToggle" title="Переключить тему">
+                <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+                <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+            <button class="top-bar-btn" id="accessibilityBtn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                </svg>
+                Ko'zi ojizlar uchun
+            </button>
+        </div>
+    </div>
+</div>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="header-left">
+                <img src="logo-icp.png" alt="ICP" class="logo">
+            </div>
+            <div class="header-controls">
+                <div class="currency-switch">
+                    <button data-currency="UZS" class="active">UZS</button>
+                    <button data-currency="USD">USD</button>
+                </div>
+                <div class="theme-switch">
+    <button id="themeLight" class="theme-btn active" title="Светлая тема">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <circle cx="12" cy="12" r="4"/>
+            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+        </svg>
+    </button>
+    <button id="themeDark" class="theme-btn" title="Тёмная тема">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+    </button>
+</div>
+                <button id="refreshBtn" class="btn-refresh">Обновить</button>
+                <span id="lastRefreshLabel">Обновлено: —</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+
+            <!-- ПОИСК КОНЕЧНОГО ТОВАРА -->
+<div class="card search-card">
+    <h2 class="card-title">🔍 Поиск конечного товара</h2>
+    <div class="search-wrap">
+        <input type="text" id="productSearch" placeholder="Введите код ТН ВЭД или наименование товара...">
+        <button id="clearProductSearch" class="search-clear">✕</button>
+        <div id="productSuggestions" class="suggestions hidden"></div>
+    </div>
+</div>
+    <div class="analysis-params card">
+        <h2 class="analysis-title">Параметры анализа</h2>
+        <div class="analysis-row">
+            <div class="analysis-field">
+                <label>Поиск</label>
+                <input type="text" id="analysisSearch" placeholder="Введите название товара или код ТН ВЭД">
+            </div>
+            <div class="analysis-field">
+                <label>Курс доллара (сум)</label>
+                <input type="number" id="analysisRate" value="12600">
+            </div>
+            <div class="analysis-field">
+                <label>Минимальный балл</label>
+                <input type="number" id="analysisMinBall" value="1">
+            </div>
+            <div class="analysis-field">
+                <label>Период</label>
+                <select id="analysisPeriod">
+                    <option value="all">Все периоды</option>
+                </select>
+            </div>
+            <div class="analysis-field">
+                <label>Регионы</label>
+                <select id="analysisRegion">
+                    <option value="all">Все регионы</option>
+                </select>
+            </div>
+            <div class="analysis-field analysis-field-btn">
+                <button id="analysisUpdate" class="btn-primary">Обновить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 карточки -->
+   <div class="stats-cards">
+
+    <div class="kpi-card kpi-card--orange">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-label">Приоритетные товары</div>
+        <div class="kpi-value" id="kpiPriorityValue">—</div>
+        <div class="kpi-sub" id="kpiPrioritySub">+86 С начала года</div>
+    </div>
+
+    <div class="kpi-card kpi-card--green">
+        <div class="kpi-icon">🛒</div>
+        <div class="kpi-label">Потенциальный рынок</div>
+        <div class="kpi-value" id="kpiMarketValue">—</div>
+        <div class="kpi-sub" id="kpiMarketSub">+86 Относительно прошлого года</div>
+    </div>
+
+    <div class="kpi-card kpi-card--blue">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-label">Средняя импортозависимость</div>
+        <div class="kpi-value" id="kpiImportValue">—</div>
+        <div class="kpi-sub" id="kpiImportSub">+86 Относительно прошлого года</div>
+    </div>
+
+    <div class="kpi-card kpi-card--purple">
+        <div class="kpi-icon">🏭</div>
+        <div class="kpi-label">Потенциал локализации</div>
+        <div class="kpi-value" id="kpiLocValue">—</div>
+        <div class="kpi-sub" id="kpiLocSub">+86 Относительно прошлого года</div>
+    </div>
+
+</div>
+
+    <div id="app"></div>
+</main>
+
+<!-- ПРИОРИТЕТНЫЕ ТОВАРЫ -->
+<div id="topProductsCard" class="card">
+    <div class="top-head">
+        <div>
+            <h2 class="card-title">★ Приоритетные товары</h2>
+            <div class="small">Рейтинг приоритетных товаров</div>
+        </div>
+        <div class="top-actions">
+    <input type="text" id="topProductsSearch" class="search-inline" placeholder="🔍 Поиск по коду ТН ВЭД или названию...">
+    <button id="clearTopSearch" class="search-inline-clear" title="Очистить">✕</button>
+    <button id="toggleTopProducts" class="ghost">Скрыть список</button>
+            <div class="criteria">
+            </div>
+        </div>
+    </div>
+    <div id="topProductsListWrap" class="top-scroll">
+        <div id="topProductsList">
+            <div class="top-table-head">
+                <div>№</div>
+                <div>ТОВАР И КОД ТН ВЭД</div>
+                <div>ПОТЕНЦИАЛ</div>
+                <div>РЫНОК</div>
+                <div>ИМПОРТОЗАВИСИМОСТЬ</div>
+                <div>ЭКСПОРТ</div>
+                <div>ПРОИЗВОДСТВО</div>
+                <div>ОБЩИЙ БАЛЛ</div>
+                <div>РЕКОМЕНДАЦИЯ</div>
+            </div>
+            <div id="topProductsBody"></div>
+        </div>
+    </div>
+    <div id="topProductsFooter" class="top-footer hidden">
+        <span id="topCountInfo" class="count-info"></span>
+        <button id="showMoreTop" class="show-more">Показать ещё 10</button>
+    </div>
+</div>
+
+ <!-- ═══════════════════════════════════════════════════════════
+     ТОВАРЫ С ВЫСОКОЙ ИМПОРТОЗАВИСИМОСТЬЮ + ГРАФИК
+     ═══════════════════════════════════════════════════════════ -->
+<div class="two-cols" style="margin-top:20px;">
+    <div class="card">
+        <div class="top-head">
+            <div>
+                <h2 class="h2title"><span class="sec-ico"></span><span>Товары с высокой импортозависимостью</span></h2>
+                <div class="small">Товары с наибольшей долей импорта во внутреннем потреблении</div>
+            </div>
+            <div class="top-actions">
+    <button id="importDepShowAll" class="ghost">Все</button>
+</div>
+        </div>
+        <div id="importDependencyList" class="dependency-list">
+            <div class="small">Загрузка...</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="top-head">
+            <div>
+                <h2 class="h2title"><span class="sec-ico"></span><span>Рынок и местное производство</span></h2>
+                <div class="small">Каждая точка — отдельный товар. Размер точки — объём рынка.</div>
+            </div>
+        </div>
+        <div class="chart-wrap" style="height:400px; position:relative;">
+            <canvas id="marketChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ТАРИФНАЯ ИНВЕРСИЯ
+     ═══════════════════════════════════════════════════════════ -->
+<div class="card" style="margin-top:20px;">
+    <div class="top-head">
+        <div>
+            <h2 class="h2title"><span class="sec-ico">⚠</span><span>Товары с тарифной инверсией</span></h2>
+            <div class="small">"Сформированный рейтинг тарифной инверсии"</div>
+        </div>
+        <div class="top-actions">
+           <input type="text" id="tariffSearch" placeholder="Код или наименование">
+           <button id="tariffSortBtn">Превышение ↓</button>
+          <button id="tariffToggleBtn" class="ghost">Скрыть список</button>   <!-- ← ДОБАВИТЬ -->
+        </div>
+    </div>
+    <div id="tariffInversionWrap" class="table-scroll">
+        <div id="tariffInversionList">
+            <div class="tariff-table-head">
+                <div>№</div>
+                <div>КОД ТН ВЭД</div>
+                <div>НАИМЕНОВАНИЕ ТОВАРА</div>
+                <div>СТАВКА ТОВАРА</div>
+                <div>СУММА СТАВОК КОМПОНЕНТОВ</div>
+                <div>КОМПОНЕНТОВ</div>
+                <div>ОБЩИЙ БАЛЛ</div>
+                <div>ПОТЕНЦИАЛ</div>
+            </div>
+            <div id="tariffInversionBody"></div>
+        </div>
+    </div>
+    <div id="tariffInversionFooter" class="top-footer hidden">
+        <span id="tariffInversionCountInfo" class="count-info"></span>
+        <button id="tariffShowMore" class="show-more">Показать ещё 25</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ТОП ПРОДУКЦИИ В ГОСЗАКУПКАХ
+     ═══════════════════════════════════════════════════════════ -->
+<div id="topProcurementCard" class="card" style="margin-top:20px;">
+    <div class="top-head">
+        <div>
+            <h2 class="h2title"><span class="sec-ico">🛒</span><span>Топ продукции в госзакупках</span></h2>
+            <div class="small">"Сформированный рейтинг госзакупок"</div>
+        </div>
+        <div class="top-actions">
+            <div class="segmented" id="topProcurementCurrency">
+                <button type="button" data-cur="UZS" class="active">сум</button>
+                <button type="button" data-cur="USD">USD</button>
+            </div>
+            <div class="segmented" id="topProcurementFilter">
+                <button type="button" data-filter="all" class="active">Все</button>
+                <button type="button" data-filter="industrial">Предприятие</button>
+                <button type="button" data-filter="outside">Вне реестра</button>
+            </div>
+            <button id="topProcurementToggle" class="ghost" type="button" onclick="toggleProcurement()">Скрыть</button>
+        </div>
+    </div>
+    <div id="topProcurementWrap" class="table-scroll">
+        <div id="topProcurementList">
+          <div class="proc-table-head">
+    <div class="col-rank">№</div>
+    <div class="col-code">КОД ТН ВЭД</div>
+    <div class="col-name">НАИМЕНОВАНИЕ ТОВАРА</div>
+    <div class="col-total">ВСЕГО</div>
+    <div class="col-ind">ПРЕДПРИЯТИЕ</div>
+    <div class="col-out">ВНЕ РЕЕСТРА</div>
+    <div class="col-count">КОЛ-ВО</div>
+</div>
+            <div id="topProcurementBody"></div>
+        </div>
+    </div>
+    <div id="topProcurementFooter" class="top-footer hidden">
+    <span id="topProcurementCountInfo" class="count-info"></span>
+    <button id="topProcurementShowMore" class="show-more">Показать ещё 25</button>
+</div>
+</div>
+        <div id="app"></div>
+
+        <!-- ═══════════════════════════════════════════════════════════
+     КАРТОЧКА ВЫБРАННОГО ТОВАРА
+     ═══════════════════════════════════════════════════════════ -->
+<section id="selectedProductCard" class="card hidden" style="margin-top:20px;">
+    <div class="selected-head">
+        <h2 class="selected-title" id="selectedName">—</h2>
+        <div class="selected-meta">
+            <span class="badge">Код ТН ВЭД: <b id="selectedCode">—</b></span>
+            <span class="badge">Цепочек: <b id="selectedChainCount">—</b></span>
+        </div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-label">Объём импорта</div>
+            <div class="metric-value" id="metricImport">—</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Объём экспорта</div>
+            <div class="metric-value" id="metricExport">—</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Производство</div>
+            <div class="metric-value" id="metricProduction">—</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Объём госзакупок</div>
+            <div class="metric-value" id="metricProcurement">—</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Объём рынка</div>
+            <div class="metric-value" id="metricMarket">—</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Импортозависимость</div>
+            <div class="metric-value" id="metricImportDep">—</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Производителей</div>
+            <div class="metric-value" id="metricProducers">—</div>
+        </div>
+    </div>
+
+    <div class="formula-note">Рынок = производство + импорт − экспорт</div>
+</section>
+
+<section id="treeSection" class="card hidden" style="margin-top:20px;">
+    <h2 class="card-title">🌳 Иерархия производства — дерево</h2>
+
+    <!-- ═══ ПЛАШКА ТАРИФНОЙ РЕКОМЕНДАЦИИ ═══ -->
+    <div id="tariffRecommendation" class="tariff-banner">
+        <div class="tariff-banner-head">
+            <span class="tariff-icon">⚠️</span>
+            <span>Тарифная рекомендация по выбранному товару</span>
+        </div>
+        <div class="tariff-chips">
+            <span class="chip">Ставка Parent: <b id="trParentRate">5%</b></span>
+            <span class="chip">Сумма ставок компонентов: <b id="trSumRate">35%</b></span>
+            <span class="chip">Найдено ставок: <b id="trFound">7/7</b></span>
+        </div>
+        <div class="tariff-hint" id="trHint">
+            Parent: — автоматическая модель. Итоговая сумма рассчитана по всем кодам компонентов.
+        </div>
+    </div>
+
+    <div id="treeContainer"></div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ИМПОРТЁРЫ И ЭКСПОРТЁРЫ
+     ═══════════════════════════════════════════════════════════ -->
+<div id="tradersSection" class="two-cols hidden" style="margin-top:20px;">
+    <div class="card" id="importersBox">
+        <h2 class="card-title">↓ Импортёры (<span class="count">0</span>)</h2>
+        <table><thead><tr><th>Импортёр</th><th>Объём</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card" id="exportersBox">
+        <h2 class="card-title">↑ Экспортёры (<span class="count">0</span>)</h2>
+        <table><thead><tr><th>Экспортёр</th><th>Объём</th></tr></thead><tbody></tbody></table>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ПРОИЗВОДИТЕЛИ + РЕКОМЕНДАЦИЯ
+     ═══════════════════════════════════════════════════════════ -->
+<div id="prodRecSection" class="two-cols hidden" style="margin-top:20px;">
+    <div class="card" id="manufacturersBox">
+        <h2 class="card-title">🏭 Производители</h2>
+        <table><thead><tr><th>Производитель</th><th>Объём</th><th>ИНН</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="card" id="recommendationBox">
+        <h2 class="card-title">💡 Рекомендация</h2>
+        <div id="recContent" class="small">—</div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     АНАЛИТИКА ВСЕХ УЗЛОВ
+     ═══════════════════════════════════════════════════════════ -->
+<section id="chainAnalyticsSection" class="card hidden">
+    <!-- ═══ ЗАГОЛОВОК + УТИЛИТЫ ═══ -->
+    <div class="analytics-head">
+        <div>
+            <h2 class="card-title">📊 Аналитическая платформа</h2>
+            <div class="small">Анализ всех узлов выбранной цепочки</div>
+        </div>
+        <div class="analytics-controls">
+            <div class="segmented" id="analyticsCurrency">
+                <button type="button" data-cur="UZS" class="active">UZS</button>
+                <button type="button" data-cur="USD">USD</button>
+            </div>
+            <div class="search-inline-wrap">
+                <input type="text" id="analyticsSearch" placeholder="ТН ВЭД код или название" class="search-inline-input">
+                <button class="search-inline-btn" title="Поиск">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="7"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="segmented" id="analyticsFilter">
+                <button type="button" data-filter="all" class="active">Все</button>
+                <button type="button" data-filter="industrial">В предприятиях</button>
+                <button type="button" data-filter="outside">Вне реестра</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ТАБЛИЦА ═══ -->
+    <div class="analytics-table-wrap">
+        <table class="analytics-table">
+            <thead>
+                <tr>
+                    <th>Уровень</th>
+                    <th>ТН ВЭД</th>
+                    <th>Товар</th>
+                    <th>Импорт</th>
+                    <th>Экспорт</th>
+                    <th>Производство</th>
+                    <th>Рынок</th>
+                    <th>Импортозависимость</th>
+                    <th>Индекс локализации</th>
+                    <th>Производители</th>
+                    <th>Решение</th>
+                    <th>Ставка</th>
+                </tr>
+            </thead>
+            <tbody id="chainAnalyticsBody"></tbody>
+        </table>
+    </div>
+</section>
+    </main>
+
+        <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <script src="api.js"></script>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
