@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://cooperation-map-api.onrender.com';
 
 async function apiGet(path) {
     const res = await fetch(API_BASE + path);
