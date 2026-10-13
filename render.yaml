@@ -1,9 +1,6 @@
 services:
-  # ═══════════════════════════════════════
-  # БЭКЕНД (API)
-  # ═══════════════════════════════════════
   - type: web
-    name: cooperation-map-api
+    name: cooperation-map
     env: python
     plan: free
     region: frankfurt

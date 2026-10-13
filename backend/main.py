@@ -222,7 +222,9 @@ def health():
     }
 
 
-f# ═══ Раздача фронта — после всех API ═══
+# ═══════════════════════════════════════════════════════════
+# РАЗДАЧА ФРОНТА — ПОСЛЕ ВСЕХ API
+# ═══════════════════════════════════════════════════════════
 from fastapi.staticfiles import StaticFiles
 
 frontend_path = Path(__file__).parent.parent / "frontend"
