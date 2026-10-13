@@ -1179,53 +1179,11 @@ function fmtProcSum(uzs) {
     return prefix + Math.round(v).toLocaleString('ru-RU') + suffix;
 }
 
-// ===== ЗАГРУЗКА ДАННЫХ ИЗ API =====
-async function loadAllData() {
-    const endpoints = {
-        connection: '/api/connection',
-        imp: '/api/import',
-        exp: '/api/export',
-        prom: '/api/production',
-        procurement: '/api/procurement',
-        registry: '/api/registry',
-        stavka: '/api/stavka'
-    };
-
-    console.log("🚀 Загрузка данных...");
-
-    for (const [key, path] of Object.entries(endpoints)) {
-        try {
-            const res = await fetch(API_BASE + path);
-            if (!res.ok) throw new Error(`${key}: HTTP ${res.status}`);
-            const json = await res.json();
-            window.DATA[key] = Array.isArray(json) ? json : [];
-            console.log(`✅ ${key}: ${window.DATA[key].length}`);
-        } catch (err) {
-            console.error(`❌ ${key}:`, err);
-            window.DATA[key] = [];
-        }
-    }
-
-    // Обновляем метку
-    const label = document.getElementById("lastRefreshLabel");
-    if (label) {
-        label.textContent = "Обновлено: " + new Date().toLocaleString("ru-RU");
-    }
-
-    console.log("✅ Данные загружены");
-
-    // Запускаем построение блоков
-    if (typeof buildTopProducts === "function") buildTopProducts();
-    if (typeof buildTariffInversion === "function") buildTariffInversion();
-    if (typeof buildTopProcurement === "function") buildTopProcurement();
-    if (typeof updateStatsCards === "function") updateStatsCards();
-}
-
 // ===== КНОПКА ОБНОВИТЬ =====
-document.getElementById("refreshBtn")?.addEventListener("click", loadAllData);
+document.getElementById("refreshBtn")?.addEventListener("click", loadAll);
 
 // ===== СТАРТ =====
-loadAllData();
+// loadAll() запускается через DOMContentLoaded в начале файла
 
 // ===== ПОИСК КОНЕЧНОГО ТОВАРА =====
 
