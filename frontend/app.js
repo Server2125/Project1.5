@@ -2986,3 +2986,22 @@ function updateTariffBanner(node, code) {
     }
     window.addEventListener('load', hook);
 })();
+
+// ═══════════════════════════════════════════════════════════
+// АВТОЗАПУСК ПЛАТФОРМЫ
+// ═══════════════════════════════════════════════════════════
+(function autoStart() {
+    function run() {
+        console.log('🚀 Автозапуск платформы...');
+        if (typeof loadAll === 'function') {
+            loadAll();
+        } else {
+            console.error('❌ loadAll не найдена');
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run);
+    } else {
+        run();
+    }
+})();
