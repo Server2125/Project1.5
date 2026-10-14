@@ -122,6 +122,8 @@ async function loadAll() {
 
         console.log('✅ Шаг 1 завершён. Roots[0] =', APP.model.roots[0]);
 
+
+
         // ═══════════════════════════════════════════════
         // РЕНДЕР ВСЕХ БЛОКОВ — ОДИН РАЗ!
         // ═══════════════════════════════════════════════
@@ -129,6 +131,7 @@ async function loadAll() {
         renderTopProducts();
         renderMarketChart();
         renderImportDependency();
+        buildTariffInversion();
         renderTariffInversion();
         renderProcurement();
 
@@ -538,148 +541,128 @@ function renderProcurement() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// ГРАФИК: Рынок × Производство
+// ГРАФИК: Рынок × Производство (bubble + линия тренда)
 // ═══════════════════════════════════════════════════════════
-let _chartInstance = null;
+let _marketChartInstance = null;
 
 function renderMarketChart() {
-    const canvas = document.getElementById("marketChart");
-    if (!canvas || typeof Chart === "undefined") return;
+    console.log('📈 renderMarketChart: старт');
 
-    if (marketChartInstance) marketChartInstance.destroy();
+    const canvas = document.getElementById('marketChart');
+    if (!canvas) {
+        console.warn('⚠ #marketChart не найден');
+        return;
+    }
+    if (typeof Chart === 'undefined') {
+        console.warn('⚠ Chart.js не подключён');
+        return;
+    }
 
-    const data = [...topProducts]
-        .filter(p => p.market > 0 && p.prodUSD !== undefined)
-        .sort((a, b) => b.market - a.market)
-        .slice(0, 100);
+    // Уничтожаем старый график
+    if (_marketChartInstance) {
+        try { _marketChartInstance.destroy(); } catch(e) {}
+        _marketChartInstance = null;
+    }
 
-    const points = data.map(p => ({
-        x: p.market / 1e9,
-        y: p.prodUSD / 1e9,
-        r: Math.max(4, Math.min(20, Math.sqrt(p.market / 1e12) * 10))
-    }));
+    // Собираем точки из модели
+    const points = [];
+    const meta = [];
 
-    // Градиент для точек
-    const gradient = canvas.getContext("2d").createLinearGradient(0, 0, 0, 340);
-    gradient.addColorStop(0, "rgba(59, 130, 246, 0.9)");
-    gradient.addColorStop(1, "rgba(37, 99, 235, 0.7)");
+    for (const [code, node] of APP.model.products) {
+        if (node.market > 0) {
+            points.push({
+                x: node.market / 1e9,
+                y: (node.prod || 0) / 1e9,
+                r: Math.max(3, Math.min(18, Math.sqrt(node.market / 1e10) * 2.5)),
+            });
+            meta.push({ code, name: node.name, id: node.id });
+        }
+    }
 
-    marketChartInstance = new Chart(canvas, {
+    console.log('📈 renderMarketChart: точек =', points.length);
+
+    if (!points.length) {
+        console.warn('⚠ Нет точек');
+        return;
+    }
+
+    // Линия тренда (линейная регрессия)
+    const n = points.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+    for (const p of points) {
+        sumX  += p.x;
+        sumY  += p.y;
+        sumXY += p.x * p.y;
+        sumX2 += p.x * p.x;
+    }
+    const slope     = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    const minX = Math.min(...points.map(p => p.x));
+    const maxX = Math.max(...points.map(p => p.x));
+    const trendData = [
+        { x: minX, y: slope * minX + intercept },
+        { x: maxX, y: slope * maxX + intercept },
+    ];
+
+    console.log('📈 renderMarketChart: создаю Chart...');
+
+    _marketChartInstance = new Chart(canvas, {
         type: 'bubble',
         data: {
             datasets: [
-    {
-        label: 'Товары',
-        data: points,
-        backgroundColor: gradient,
-        borderColor: 'rgba(29, 78, 216, 1)',
-        borderWidth: 1.5,
-        hoverBackgroundColor: 'rgba(37, 99, 235, 1)',
-    },
-    // 📈 Линия тренда
-    {
-        label: 'Тренд',
-        type: 'line',
-        data: (() => {
-            // Линейная регрессия y = a*x + b
-            const n = points.length;
-            if (n < 2) return [];
-            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (const p of points) {
-                sumX += p.x;
-                sumY += p.y;
-                sumXY += p.x * p.y;
-                sumX2 += p.x * p.x;
-            }
-            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-            const intercept = (sumY - slope * sumX) / n;
-            const minX = Math.min(...points.map(p => p.x));
-            const maxX = Math.max(...points.map(p => p.x));
-            return [
-                { x: minX, y: slope * minX + intercept },
-                { x: maxX, y: slope * maxX + intercept },
-            ];
-        })(),
-        borderColor: '#ef4444',
-        borderWidth: 2,
-        borderDash: [6, 4],
-        pointRadius: 0,
-        fill: false,
-        tension: 0,
-    },
-]
+                {
+                    label: 'Товары',
+                    data: points,
+                    backgroundColor: 'rgba(96, 165, 250, 0.6)',
+                    borderColor: 'rgba(37, 99, 235, 1)',
+                    borderWidth: 1.5,
+                },
+                {
+                    label: 'Тренд',
+                    type: 'line',
+                    data: trendData,
+                    borderColor: '#ef4444',
+                    borderWidth: 2,
+                    borderDash: [6, 4],
+                    pointRadius: 0,
+                    fill: false,
+                },
+            ],
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            animation: {
-                duration: 800,
-                easing: 'easeOutQuart'
-            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
-                    backgroundColor: 'rgba(15, 23, 42, 0.95)',
-                    titleColor: '#f8fafc',
-                    bodyColor: '#cbd5e1',
-                    padding: 14,
-                    cornerRadius: 10,
-                    displayColors: false,
-                    titleFont: { size: 13, weight: 'bold' },
-                    bodyFont: { size: 12 },
-                    borderColor: '#3b82f6',
-                    borderWidth: 1,
                     callbacks: {
-                        title: (ctx) => {
-                            const p = data[ctx[0].dataIndex];
-                            return p.name;
-                        },
                         label: (ctx) => {
-                            const p = data[ctx.dataIndex];
+                            if (ctx.dataset.label === 'Тренд') return '';
+                            const m = meta[ctx.dataIndex];
                             return [
-                                `Рынок: ${Math.round(p.market / 1e9)} млрд сум`,
-                                `Производство: ${Math.round(p.prodUSD / 1e9)} млрд сум`
+                                m.name,
+                                'ТН ВЭД: ' + m.code,
+                                'Рынок: ' + ctx.parsed.x.toFixed(1) + ' млрд',
+                                'Производство: ' + ctx.parsed.y.toFixed(1) + ' млрд',
                             ];
-                        }
-                    }
-                }
+                        },
+                    },
+                },
             },
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Объём рынка (млрд сум)',
-                        color: '#475569',
-                        font: { size: 12, weight: '600' }
-                    },
-                    grid: {
-                        color: '#f1f5f9',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#64748b',
-                        font: { size: 11 }
-                    }
+                    title: { display: true, text: 'Объём рынка (млрд сум)' },
+                    beginAtZero: true,
                 },
                 y: {
-                    title: {
-                        display: true,
-                        text: 'Производство (млрд сум)',
-                        color: '#475569',
-                        font: { size: 12, weight: '600' }
-                    },
-                    grid: {
-                        color: '#f1f5f9',
-                        drawBorder: false
-                    },
-                    ticks: {
-                        color: '#64748b',
-                        font: { size: 11 }
-                    }
-                }
-            }
-        }
+                    title: { display: true, text: 'Производство (млрд сум)' },
+                    beginAtZero: true,
+                },
+            },
+        },
     });
+
+    console.log('📈 renderMarketChart: готово ✅');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1345,108 +1328,80 @@ let checkBuild = setInterval(() => {
     }
 }, 500);
 
-// ===== ТАРИФНАЯ ИНВЕРСИЯ =====
-
+// ═══════════════════════════════════════════════════════════
+// ТАРИФНАЯ ИНВЕРСИЯ
+// ═══════════════════════════════════════════════════════════
 function buildTariffInversion() {
-    if (!window.DATA || !window.DATA.stavka || !window.DATA.stavka.length) {
-        console.warn("Данные stavka не загружены");
+    // Берём данные из APP.raw
+    const stavka = (APP.raw && APP.raw.stavka) || [];
+    const procurement = (APP.raw && APP.raw.procurement) || [];
+
+    if (!stavka.length) {
+        console.warn('⚠ Данные Stavka не загружены');
+        tariffInversionData = [];
         return;
     }
 
+    // Индекс: code → max rate
     const rateIndex = new Map();
-    for (const r of window.DATA.stavka) {
-        const code = String(r.TNVED || r.tnved || "").replace(".0", "").trim();
+    for (const r of stavka) {
+        const code = String(r.TNVED || r.tnved || '').replace(/\.0$/, '').trim();
         if (!code) continue;
-        const rate = Number(String(r.Stavka || r.stavka || "0").replace("%", "").replace(",", ".")) || 0;
+        const rate = Number(
+            String(r.Stavka || r.stavka || '0').replace('%', '').replace(',', '.')
+        ) || 0;
         if (!rateIndex.has(code) || rateIndex.get(code) < rate) {
             rateIndex.set(code, rate);
         }
     }
 
-    const namesByCode = new Map();
-    for (const r of (window.DATA.procurement || [])) {
-        const code = String(r.good_code || "").replace(".0", "").trim();
-        const name = r.good_name || r.good_category || "";
-        if (code && name && !namesByCode.has(code)) {
-            namesByCode.set(code, name);
+    // Названия из stavka
+    const namesFromStavka = new Map();
+    for (const r of stavka) {
+        const code = String(r.TNVED || '').replace(/\.0$/, '').trim();
+        const name = String(r.good_name || '').trim();
+        if (code && name && !namesFromStavka.has(code)) {
+            namesFromStavka.set(code, name);
         }
     }
 
-   // Собираем названия из stavka (good_name) — приоритет
-const namesFromStavka = new Map();
-for (const r of window.DATA.stavka) {
-    const code = String(r.TNVED || "").replace(".0", "").trim();
-    const name = (r.good_name || "").trim();
-    if (code && name && !namesFromStavka.has(code)) {
-        namesFromStavka.set(code, name);
+    // Названия из procurement (fallback)
+    const namesFromProc = new Map();
+    for (const r of procurement) {
+        const code = String(r.good_code || '').replace(/\.0$/, '').trim();
+        const name = String(r.good_name || '').trim();
+        if (code && name && !namesFromProc.has(code)) {
+            namesFromProc.set(code, name);
+        }
     }
-}
-tariffInversionData = [...rateIndex.entries()].map(([code, rate]) => ({
-    code: code,
-    name: namesFromStavka.get(code) || "Товар " + code,
-    parentRate: rate,
-    sumComponents: rate * 1.5,
-    componentCount: Math.floor(Math.random() * 20) + 3,
-    totalScore: Math.round(rate * 1.5),
-    excess: rate * 0.5
-})).filter(x => x.excess > 0.01);
+
+    // Собираем массив
+    tariffInversionData = [];
+    for (const [code, rate] of rateIndex) {
+        if (rate <= 0) continue;
+
+        const name = namesFromStavka.get(code) || namesFromProc.get(code) || ('Товар ' + code);
+        const excess = Math.max(0, rate - 5);
+
+        tariffInversionData.push({
+            code,
+            name,
+            parentRate: rate,
+            sumComponents: rate * 1.5,
+            componentCount: 3,
+            totalScore: Math.round(rate * 1.5),
+            excess,
+        });
+    }
 
     tariffInversionData.sort((a, b) => b.excess - a.excess);
 
-    console.log("📊 Тарифная инверсия:", tariffInversionData.length);
+    console.log('📊 Тарифная инверсия: записей =', tariffInversionData.length);
 
-    if (typeof renderTariffInversion === "function") renderTariffInversion();
+    if (typeof renderTariffInversion === 'function') {
+        renderTariffInversion();
+    }
 }
-
-// Запуск после данных
-let checkTariff = setInterval(() => {
-    if (window.DATA && window.DATA.stavka && window.DATA.stavka.length > 0) {
-        clearInterval(checkTariff);
-        buildTariffInversion();
-    }
-}, 500);
-
-// ===== ОБРАБОТЧИКИ ТАРИФНОЙ ИНВЕРСИИ =====
-
-document.getElementById('tariffSearch')?.addEventListener('input', (e) => {
-    tariffInversionSearch = e.target.value.toLowerCase().trim();
-    renderTariffInversion();
-});
-
-document.getElementById('tariffSortBtn')?.addEventListener('click', (e) => {
-    const order = ['excess', 'score', 'code'];
-    const idx = (order.indexOf(tariffInversionSort) + 1) % order.length;
-    tariffInversionSort = order[idx];
-    const labels = { excess: 'Превышение ↓', score: 'Балл ↓', code: 'По коду ↑' };
-    e.target.textContent = labels[tariffInversionSort];
-    renderTariffInversion();
-});
-
-document.getElementById('tariffShowMore')?.addEventListener('click', () => {
-    tariffInversionVisible += 25;
-    renderTariffInversion();
-});
-
-// ===== СКРЫТЬ / ПОКАЗАТЬ ТАРИФНУЮ ИНВЕРСИЮ =====
-
-let tariffInversionCollapsed = false;
-
-document.getElementById('tariffToggleBtn')?.addEventListener('click', (e) => {
-    tariffInversionCollapsed = !tariffInversionCollapsed;
-
-    const wrap = document.getElementById('tariffInversionWrap');
-    const footer = document.getElementById('tariffInversionFooter');
-
-    if (tariffInversionCollapsed) {
-        if (wrap) wrap.style.display = 'none';
-        if (footer) footer.style.display = 'none';
-        e.target.textContent = 'Показать список';
-    } else {
-        if (wrap) wrap.style.display = '';
-        if (footer) footer.style.display = '';
-        e.target.textContent = 'Скрыть список';
-    }
-});
 
 // ===== СКРЫТЬ / ПОКАЗАТЬ ГОСЗАКУПКИ =====
 
